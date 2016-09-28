@@ -1,6 +1,6 @@
-use super::*;
-use std::io::{self, BufRead, Read, Cursor};
 use byteorder::{ByteOrder, BigEndian, ReadBytesExt};
+use std::io::{self, BufRead, Read, Cursor};
+use super::*;
 
 const LENGTH_DET_SHORT: u8 = 0b0000_0000;
 const LENGTH_DET_LONG: u8 = 0b1000_0000;
@@ -33,7 +33,7 @@ impl<'a> Decoder<'a> {
         }
         Ok(())
     }
-    
+
     pub fn decode_length(&mut self) -> Result<usize, DecodeError> {
         let mut ret = self.cur.read_u8();
         if ret.is_err() {

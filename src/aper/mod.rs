@@ -26,5 +26,5 @@ pub trait APerElement {
     type Result;
     const TAG: u32;
     const CONSTRAINTS: Option<Constraints>; // visible constraints
-    fn decode(data: &[u8]) -> Result<Self::Result, decoder::DecodeError>;
+    fn aper_decode(data: &[u8]) -> Result<Self::Result, decoder::DecodeError>;
 }
