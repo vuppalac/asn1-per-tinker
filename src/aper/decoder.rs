@@ -1,5 +1,5 @@
-use byteorder::{ByteOrder, BigEndian, ReadBytesExt};
-use std::io::{self, BufRead, Read, Cursor};
+use byteorder::{ByteOrder, BigEndian, ReadBytesExt, WriteBytesExt};
+use std::io::{self, BufRead, Read, Write, Cursor};
 use super::*;
 
 const LENGTH_DET_SHORT: u8 = 0b0000_0000;
@@ -16,16 +16,53 @@ pub enum DecodeError {
 
 pub struct Decoder<'a> {
     cur: Cursor<&'a [u8]>,
+    padding: i32,
 }
 
 impl<'a> Decoder<'a> {
     pub fn new(data: &'a [u8]) -> Decoder {
-        Decoder { cur: Cursor::new(data) }
+        Decoder {
+            cur: Cursor::new(data),
+            padding: 0,
+        }
+    }
+
+    // Read bits with left-padding
+    fn peek_with_padding(&mut self, padding: i32) -> Result<u8, ()> {
+        let ret = self.cur.read_u8();
+        if ret.is_err() {
+            return Err(());
+        }
+        let b = ret.unwrap();
+        let pos = self.cur.position();
+        self.cur.set_position(pos - 1);
+        if padding < 0 {
+            Ok(b >> -padding)
+        } else {
+            Ok(b << padding)
+        }
+    }
+
+    pub fn read_u8(&mut self) -> Result<u8, ()> {
+        if self.padding > 0 {
+            let padding = self.padding;
+            self.padding = -padding;
+            return self.peek_with_padding(padding);
+        } else if self.padding < 0 {
+            let padding = self.padding;
+            self.padding = 0;
+            return self.peek_with_padding(padding);
+        }
+        let ret = self.cur.read_u8();
+        if ret.is_err() {
+            return Err(());
+        }
+        Ok(ret.unwrap())
     }
 
     fn read_to_vec(&mut self, content: &mut Vec<u8>, len: usize) -> Result<(), ()> {
         for _ in 0..len {
-            let ret = self.cur.read_u8();
+            let ret = self.read_u8();
             if ret.is_err() {
                 return Err(());
             }
@@ -35,7 +72,7 @@ impl<'a> Decoder<'a> {
     }
 
     pub fn decode_length(&mut self) -> Result<usize, DecodeError> {
-        let mut ret = self.cur.read_u8();
+        let mut ret = self.read_u8();
         if ret.is_err() {
             unreachable!(); // XXX: use meaninful error code here
         }
@@ -45,7 +82,7 @@ impl<'a> Decoder<'a> {
             unimplemented!();
         } else if b & LENGTH_DET_LONG > 0 {
             let len: usize = (b & LENGTH_MASK_LONG) as usize;
-            ret = self.cur.read_u8();
+            ret = self.read_u8();
             if ret.is_err() {
                 return Err(DecodeError::Dummy); // XXX: return meaningful error here
             }
@@ -61,18 +98,23 @@ impl<'a> Decoder<'a> {
             let l = min.unwrap();
             let h = max.unwrap();
             let range = h - l + 1;
-            let n_bits = (range as f64).log2() as usize;
+            let n_bits = (range as f64).log2().ceil() as usize;
+            println!("range:{}, n_bits: {}", range, n_bits);
 
             // Simple case, no length determinant
             if n_bits <= 16 {
-                let mut ret = self.cur.read_u8();
+                self.padding -= n_bits as i32 - 8 - 1;
+                let mut ret = self.read_u8();
                 if ret.is_err() {
+                    self.padding = 0;
                     return Err(DecodeError::Dummy); // XXX: meaningful error here
                 }
+                self.padding -= n_bits as i32;
 
                 let mut b: u16 = ret.unwrap() as u16;
+                println!("b: {}", b);
                 if n_bits > 8 {
-                    ret = self.cur.read_u8();
+                    ret = self.read_u8();
                     if ret.is_err() {
                         return Err(DecodeError::Dummy); // XXX: meaningful error here
                     }
