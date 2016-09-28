@@ -60,7 +60,7 @@ impl<'a> Decoder<'a> {
         Ok(ret.unwrap())
     }
 
-    fn read_to_vec(&mut self, content: &mut Vec<u8>, len: usize) -> Result<(), ()> {
+    pub fn read_to_vec(&mut self, content: &mut Vec<u8>, len: usize) -> Result<(), ()> {
         for _ in 0..len {
             let ret = self.read_u8();
             if ret.is_err() {
@@ -166,5 +166,9 @@ impl<'a> Decoder<'a> {
             // semiconstrained
             Ok(BigEndian::read_int(&content, len) + min.unwrap())
         }
+    }
+
+    pub fn decode<T: APerElement>(&mut self, constraints: Constraints) -> Result<T::Result, DecodeError> {
+        T::aper_decode(self, constraints)
     }
 }

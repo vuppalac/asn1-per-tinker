@@ -1,30 +1,36 @@
 mod decoder;
 pub use self::decoder::{Decoder, DecodeError};
 
-#[derive(PartialEq)]
-pub enum ConstraintFlags {
-    UNCONSTRAINED = 0x0,
-    SEMI_CONSTRAINED = 0x1,
-    CONSTRAINED = 0x2,
-    EXTENSIBLE = 0x3,
+pub struct Constraint {
+    min: Option<i64>,
+    max: Option<i64>,
 }
 
-pub struct Constraint {
-    flags: ConstraintFlags,
-    range_bits: u32,
-    effective_bits: u32,
-    min: i64,
-    max: i64,
+impl Constraint {
+    pub fn new(min: Option<i64>, max: Option<i64>) -> Constraint {
+        Constraint {
+            min: min,
+            max: max,
+        }
+    }
+
+    pub fn min(&self) -> Option<i64> {
+        self.min
+    }
+
+    pub fn max(&self) -> Option<i64> {
+        self.max
+    }
 }
 
 pub struct Constraints {
-    value: Constraint,
-    size: Constraint,
+    pub value: Option<Constraint>,
+    pub size: Option<Constraint>,
 }
 
 pub trait APerElement {
     type Result;
     const TAG: u32;
-    const CONSTRAINTS: Option<Constraints>; // visible constraints
-    fn aper_decode(decoder: &mut Decoder) -> Result<Self::Result, decoder::DecodeError>;
+    const CONSTRAINTS: Constraints; // visible constraints
+    fn aper_decode(decoder: &mut Decoder, constraints: Constraints) -> Result<Self::Result, decoder::DecodeError>;
 }
