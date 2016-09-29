@@ -96,7 +96,12 @@ impl APerElement for BitString {
         }
         let num_bytes = (len as f64 / 8.).ceil() as usize;
         let mut content: Vec<u8> = Vec::with_capacity(num_bytes);
-        decoder.read_to_vec(&mut content, num_bytes);
+
+        let ret = decoder.read_to_vec(&mut content, num_bytes);
+        if ret.is_err() {
+            return Err(DecodeError::Dummy); // XXX: meaningful error here
+        }
+
         let delta = num_bytes * 8 - len;
         if delta > 0 && num_bytes > 1 {
             shift_bytes(&mut content, delta);
