@@ -86,17 +86,19 @@ impl APerElement for BitString {
         if constraints.size.is_none() {
             return Err(DecodeError::Dummy); // XXX: meaningful error here
         }
+
         let sz_constr = constraints.size.unwrap();
         if sz_constr.max().is_none() || sz_constr.max().unwrap() == 0 {
             return Ok(BitString::with_len(0));
         }
+
         let len = sz_constr.max().unwrap() as usize;
         if len >= 65535 {
             unimplemented!();
         }
+
         let num_bytes = (len as f64 / 8.).ceil() as usize;
         let mut content: Vec<u8> = Vec::with_capacity(num_bytes);
-
         let ret = decoder.read_to_vec(&mut content, num_bytes);
         if ret.is_err() {
             return Err(DecodeError::Dummy); // XXX: meaningful error here
@@ -106,6 +108,7 @@ impl APerElement for BitString {
         if delta > 0 && num_bytes > 1 {
             shift_bytes(&mut content, delta);
         }
+
         Ok(BitString::with_bytes_and_len(&content, len))
     }
 }
