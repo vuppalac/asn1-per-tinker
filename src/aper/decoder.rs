@@ -99,26 +99,26 @@ impl<'a> Decoder<'a> {
             let h = max.unwrap();
             let range = h - l + 1;
             let n_bits = (range as f64).log2().ceil() as usize;
-            println!("range:{}, n_bits: {}", range, n_bits);
+
+            // XXX: implement this case
+            if n_bits < 8 {
+                unimplemented!();
+            }
 
             // Simple case, no length determinant
             if n_bits <= 16 {
-                self.padding -= n_bits as i32 - 8 - 1;
                 let mut ret = self.read_u8();
                 if ret.is_err() {
-                    self.padding = 0;
                     return Err(DecodeError::Dummy); // XXX: meaningful error here
                 }
-                self.padding -= n_bits as i32;
 
                 let mut b: u16 = ret.unwrap() as u16;
-                println!("b: {}", b);
                 if n_bits > 8 {
                     ret = self.read_u8();
                     if ret.is_err() {
                         return Err(DecodeError::Dummy); // XXX: meaningful error here
                     }
-                    b += (ret.unwrap() as u16) << 8;
+                    b = (ret.unwrap() as u16) + (b << 8);
                 }
                 return Ok(b as i64 + l);
             }
