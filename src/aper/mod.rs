@@ -1,6 +1,7 @@
 mod decoder;
 pub use self::decoder::{Decoder, DecodeError};
 
+#[derive(Debug, Copy, Clone)]
 pub struct Constraint {
     min: Option<i64>,
     max: Option<i64>,
@@ -23,6 +24,7 @@ impl Constraint {
     }
 }
 
+#[derive(Debug, Copy, Clone)]
 pub struct Constraints {
     pub value: Option<Constraint>,
     pub size: Option<Constraint>,

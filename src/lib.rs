@@ -2,9 +2,9 @@
 extern crate byteorder;
 
 mod bit_string;
-mod octet_string;
 mod integer;
+mod sequence_of;
 pub mod aper;
 pub use bit_string::BitString;
 pub use integer::*;
-pub use octet_string::*;
+pub use sequence_of::*;
