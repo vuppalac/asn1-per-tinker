@@ -30,9 +30,14 @@ pub struct Constraints {
     pub size: Option<Constraint>,
 }
 
+pub const UNCONSTRAINED: Constraints = Constraints {
+    value: None,
+    size: None,
+};
+
 pub trait APerElement {
     type Result;
     const TAG: u32;
     const CONSTRAINTS: Constraints; // visible constraints
-    fn aper_decode(decoder: &mut Decoder, constraints: Constraints) -> Result<Self::Result, decoder::DecodeError>;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self::Result, decoder::DecodeError>;
 }

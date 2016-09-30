@@ -1,6 +1,6 @@
 extern crate asn1;
 use asn1::BitString;
-use asn1::aper::{self, Constraint, Constraints};
+use asn1::aper::{self, APerElement, Constraint, Constraints};
 
 #[test]
 fn get_set() {
@@ -21,7 +21,7 @@ fn get_set_non_boundary() {
 fn decode_padded() {
     let data = b"\x00\xe0\x00";
     let mut d = aper::Decoder::new(data);
-    let mut b = d.decode::<BitString>(Constraints {
+    let mut b = BitString::from_aper(&mut d, Constraints {
         value: None,
         size: Some(Constraint::new(None, Some(20))),
     }).unwrap();
@@ -39,7 +39,7 @@ fn decode_padded() {
 fn decode_padded_small() {
     let data = b"\x0e";
     let mut d = aper::Decoder::new(data);
-    let mut b = d.decode::<BitString>(Constraints {
+    let mut b = BitString::from_aper(&mut d, Constraints {
         value: None,
         size: Some(Constraint::new(None, Some(4))),
     }).unwrap();
@@ -57,7 +57,7 @@ fn decode_padded_small() {
 fn decode_unpadded() {
     let data = b"\x00\x00\xe0";
     let mut d = aper::Decoder::new(data);
-    let mut b = d.decode::<BitString>(Constraints {
+    let mut b = BitString::from_aper(&mut d, Constraints {
         value: None,
         size: Some(Constraint::new(None, Some(24))),
     }).unwrap();

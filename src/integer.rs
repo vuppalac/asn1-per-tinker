@@ -10,7 +10,7 @@ macro_rules! int_impl {
                 value: None,
                 size: None,
             };
-            fn aper_decode(decoder: &mut Decoder, constraints: Constraints) -> Result<Self::Result, DecodeError> {
+            fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self::Result, DecodeError> {
                 let ret = decoder.decode_int(Some($t::MIN as i64), Some($t::MAX as i64));
                 if ret.is_err() {
                     return Err(ret.err().unwrap());

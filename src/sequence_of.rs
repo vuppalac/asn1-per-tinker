@@ -8,7 +8,7 @@ impl<T: APerElement> APerElement for Vec<T> {
         size: None,
     };
 
-    fn aper_decode(decoder: &mut Decoder, constraints: Constraints) -> Result<Self::Result, DecodeError> {
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self::Result, DecodeError> {
         if constraints.size.is_none() {
             return Err(DecodeError::Dummy); // XXX: meaningful error here
         }
@@ -45,7 +45,7 @@ impl<T: APerElement> APerElement for Vec<T> {
         };
         let mut content: Vec<T::Result> = Vec::with_capacity(len);
         for _ in 0..len {
-            let ret = decoder.decode::<T>(el_constrs);
+            let ret = T::from_aper(decoder, el_constrs);
             if ret.is_err() {
                 return Err(DecodeError::Dummy); // XXX: meaningful error here
             }

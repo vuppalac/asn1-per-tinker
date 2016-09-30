@@ -167,8 +167,4 @@ impl<'a> Decoder<'a> {
             Ok(BigEndian::read_int(&content, len) + min.unwrap())
         }
     }
-
-    pub fn decode<T: APerElement>(&mut self, constraints: Constraints) -> Result<T::Result, DecodeError> {
-        T::aper_decode(self, constraints)
-    }
 }
