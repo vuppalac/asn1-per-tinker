@@ -24,6 +24,14 @@ fn constrained_bounds() {
 }
 
 #[test]
+fn constrained_bounds_unpadded() {
+    let data = b"\x60";
+    let mut d = aper::Decoder::new(data);
+    assert_eq!(11, d.decode_int(Some(10), Some(12)).unwrap());
+    assert_eq!(12, d.decode_int(Some(10), Some(12)).unwrap());
+}
+
+#[test]
 fn semiconstrainted_bounds() {
     let data = b"\x02\x10\x01";
     let mut d = aper::Decoder::new(data);

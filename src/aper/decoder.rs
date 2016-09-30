@@ -15,45 +15,47 @@ pub enum DecodeError {
 }
 
 pub struct Decoder<'a> {
-    cur: Cursor<&'a [u8]>,
-    padding: i32,
+    data: &'a [u8],
+    len: usize,
+    pos: usize,
 }
 
 impl<'a> Decoder<'a> {
     pub fn new(data: &'a [u8]) -> Decoder {
         Decoder {
-            cur: Cursor::new(data),
-            padding: 0,
+            data: data,
+            len: 8 * data.len(),
+            pos: 0,
         }
     }
 
-    // Read bits with left-padding
-    fn peek_with_padding(&mut self, padding: i32) -> Result<u8, ()> {
-        let ret = self.cur.read_u8();
-        if ret.is_err() {
+    pub fn read(&mut self, n: usize) -> Result<u8, ()> {
+        if self.pos + n > self.len {
             return Err(());
         }
-        let b = ret.unwrap();
-        let pos = self.cur.position();
-        self.cur.set_position(pos - 1);
-        if padding < 0 {
-            Ok(b >> -padding)
+        let mut l_bucket = self.pos / 8;
+        let mut h_bucket = (self.pos + n) / 8;
+        let l_off = self.pos - l_bucket * 8;
+        let h_off = (self.pos + n) - h_bucket * 8;
+        let mut ret: u8 = 0;
+        if l_bucket == h_bucket {
+            let mask = (0xFF >> (8 - n)) << (8 - h_off);
+            ret = (self.data[l_bucket] & mask) >> (8 - h_off);
+        } else if l_bucket < h_bucket && h_off == 0 {
+            let mask = (0xFF >> (8 - n));
+            ret = (self.data[l_bucket] & mask);
         } else {
-            Ok(b << padding)
+            let l_mask = (0xFF >> (8 - (n - h_off)));
+            let h_mask = (0xFF << (8 - h_off));
+            ret = (self.data[l_bucket] & l_mask) << h_off;
+            ret |= ((self.data[h_bucket] & h_mask) >> (8 - h_off))
         }
+        self.pos += n;
+        Ok(ret)
     }
 
     pub fn read_u8(&mut self) -> Result<u8, ()> {
-        if self.padding > 0 {
-            let padding = self.padding;
-            self.padding = -padding;
-            return self.peek_with_padding(padding);
-        } else if self.padding < 0 {
-            let padding = self.padding;
-            self.padding = 0;
-            return self.peek_with_padding(padding);
-        }
-        let ret = self.cur.read_u8();
+        let ret = self.read(8);
         if ret.is_err() {
             return Err(());
         }
@@ -100,9 +102,12 @@ impl<'a> Decoder<'a> {
             let range = h - l + 1;
             let n_bits = (range as f64).log2().ceil() as usize;
 
-            // XXX: implement this case
             if n_bits < 8 {
-                unimplemented!();
+                let ret = self.read(n_bits);
+                if ret.is_err() {
+                    return Err(DecodeError::Dummy); // XXX: meaningful error here
+                }
+                return Ok(ret.unwrap() as i64 + l);
             }
 
             // Simple case, no length determinant
