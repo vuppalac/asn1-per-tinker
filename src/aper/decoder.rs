@@ -30,14 +30,19 @@ impl<'a> Decoder<'a> {
     }
 
     pub fn read(&mut self, n: usize) -> Result<u8, ()> {
+        if n == 0 {
+            return Ok(0);
+        }
         if self.pos + n > self.len {
             return Err(());
         }
+
         let mut l_bucket = self.pos / 8;
         let mut h_bucket = (self.pos + n) / 8;
         let l_off = self.pos - l_bucket * 8;
         let h_off = (self.pos + n) - h_bucket * 8;
         let mut ret: u8 = 0;
+
         if l_bucket == h_bucket {
             let mask = (0xFF >> (8 - n)) << (8 - h_off);
             ret = (self.data[l_bucket] & mask) >> (8 - h_off);
@@ -63,12 +68,22 @@ impl<'a> Decoder<'a> {
     }
 
     pub fn read_to_vec(&mut self, content: &mut Vec<u8>, len: usize) -> Result<(), ()> {
-        for _ in 0..len {
-            let ret = self.read_u8();
-            if ret.is_err() {
-                return Err(());
+        if len == 0 {
+            return Ok(());
+        }
+        if self.pos + len > self.len {
+            return Err(());
+        }
+
+        if len < 8 {
+            content.push(self.read(len).unwrap());
+        } else {
+            let num_bytes = (len as f64 / 8.).ceil() as usize;
+            for i in 0..num_bytes {
+                println!("read byte {}", i);
+                content.push(self.read_u8().unwrap());
             }
-            content.push(ret.unwrap());
+            self.pos -= len % 8;
         }
         Ok(())
     }
@@ -140,7 +155,7 @@ impl<'a> Decoder<'a> {
             }
 
             let mut content: Vec<u8> = Vec::with_capacity(len);
-            let res = self.read_to_vec(&mut content, len);
+            let res = self.read_to_vec(&mut content, len * 8);
             if res.is_err() {
                 return Err(DecodeError::Dummy); // XXX: meaningful error code
             }
@@ -159,7 +174,7 @@ impl<'a> Decoder<'a> {
 
         let len = ret.unwrap();
         let mut content: Vec<u8> = Vec::with_capacity(len);
-        let res = self.read_to_vec(&mut content, len);
+        let res = self.read_to_vec(&mut content, len * 8);
         if res.is_err() {
             return Err(DecodeError::Dummy); // XXX: meaningful error code
         }

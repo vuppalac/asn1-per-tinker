@@ -52,7 +52,7 @@ fn decode_sequence_of_i32() {
 
 #[test]
 fn decode_sequence_of_short_bit_string() {
-    let data = b"\x02\x0e\x0e";
+    let data = b"\x02\xee";
     let mut d = aper::Decoder::new(data);
     let mut v = Vec::<BitString>::from_aper(&mut d, Constraints {
         // here the "value" constraint is a constraint on the size of each element

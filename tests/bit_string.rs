@@ -37,8 +37,9 @@ fn decode_padded() {
 
 #[test]
 fn decode_padded_small() {
-    let data = b"\x0e";
+    let data = b"\x0e"; // 0000 1110
     let mut d = aper::Decoder::new(data);
+    d.read(4);
     let mut b = BitString::from_aper(&mut d, Constraints {
         value: None,
         size: Some(Constraint::new(None, Some(4))),
@@ -62,7 +63,7 @@ fn decode_unpadded() {
         size: Some(Constraint::new(None, Some(24))),
     }).unwrap();
     println!("{:?}", b);
-    for i in 0..20 {
+    for i in 0..24 {
         if i == 5 || i == 6 || i == 7 {
             assert_eq!(true, b.is_set(i));
         } else {

@@ -9,7 +9,6 @@ struct Foo {
     pub baz: Vec<BitString>,
 }
 
-
 impl APerElement for Foo {
     type Result = Self;
     const TAG: u32 = 0xBEEF;
@@ -46,8 +45,9 @@ impl APerElement for Foo {
 
 #[test]
 fn decode_foo() {
-    let data = b"\x0e\x03\x46\x4f\x4f\x02\x0e\x0e";
+    let data = b"\x0e\x03\x46\x4f\x4f\x02\xee";
     let mut d = aper::Decoder::new(data);
+    d.read(4); // strip left-padding
     let f = Foo::from_aper(&mut d, UNCONSTRAINED).unwrap();
     let target_bar = vec![0x46 as u8, 0x4f as u8, 0x4f as u8];
 
