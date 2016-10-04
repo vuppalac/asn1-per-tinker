@@ -1,6 +1,7 @@
 use aper::{APerElement, Constraint, Constraints, Decoder, DecodeError};
 use std::cmp;
 
+/// A bit string.
 #[derive(Debug)]
 pub struct BitString {
     data: Vec<u8>,
@@ -8,6 +9,7 @@ pub struct BitString {
 }
 
 impl BitString {
+    /// Consturct a `BitString` of length `n` with all values set to 0.
     pub fn with_len(n: usize) -> BitString {
         let mut ret = BitString {
             data: Vec::<u8>::with_capacity(n / 8),
@@ -17,6 +19,7 @@ impl BitString {
         ret
     }
 
+    /// Consturct a `BitString` of length `n` with initial values contained in `data`.
     pub fn with_bytes_and_len(data: &Vec<u8>, n: usize) -> BitString {
         BitString {
             data: data.clone(),
@@ -24,15 +27,18 @@ impl BitString {
         }
     }
 
+    /// Get the length of a `BitString`
     pub fn get_num_bits(&self) -> usize {
         self.num_bits
     }
 
+    /// Set the length of a `BitString` and initialize any new values to 0
     pub fn set_num_bits(&mut self, n: usize) {
         self.num_bits = n;
         self.data.resize(n, 0);
     }
 
+    /// Check if bit `i` is set.
     pub fn is_set(&self, i: usize) -> bool {
         let mut bucket = i / 8;
         let mut pos = (i as i64 - bucket as i64 * 8) as usize;
@@ -44,6 +50,7 @@ impl BitString {
         (self.data[bucket] & (1 << pos)) > 0
     }
 
+    /// Set bit `i` to `val`.
     pub fn set(&mut self, i: usize, val: bool) {
         let mut bucket = i / 8;
         let mut pos = (i as i64 - bucket as i64 * 8) as usize;
@@ -82,6 +89,7 @@ impl APerElement for BitString {
         size: None,
     };
 
+    /// Construct a `BitString` from an aligned PER encoding.
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self::Result, DecodeError> {
         if constraints.size.is_none() {
             return Err(DecodeError::Dummy); // XXX: meaningful error here

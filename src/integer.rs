@@ -10,6 +10,7 @@ macro_rules! int_impl {
                 value: None,
                 size: None,
             };
+            /// Read an `$t` from an aligned PER encoding.
             fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self::Result, DecodeError> {
                 let ret = decoder.decode_int(Some($t::MIN as i64), Some($t::MAX as i64));
                 if ret.is_err() {

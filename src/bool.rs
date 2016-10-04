@@ -8,6 +8,7 @@ impl APerElement for bool {
         size: None,
     };
 
+    /// Read a `bool` from an aligned PER encoding.
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self::Result, DecodeError> {
         let ret = decoder.read(1);
         if ret.is_err() {

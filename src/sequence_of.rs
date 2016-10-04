@@ -8,6 +8,7 @@ impl<T: APerElement> APerElement for Vec<T> {
         size: None,
     };
 
+    /// Read a `Vec[T]` from an aligned PER encoding.
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self::Result, DecodeError> {
         if constraints.size.is_none() {
             return Err(DecodeError::Dummy); // XXX: meaningful error here

@@ -1,6 +1,7 @@
 #![feature(associated_consts)]
 extern crate byteorder;
 
+/// A module for encoding and decoding ASN.1 messages of the Aligned PER flavor.
 pub mod aper;
 
 mod bit_string;

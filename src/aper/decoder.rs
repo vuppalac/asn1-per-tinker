@@ -14,6 +14,7 @@ pub enum DecodeError {
     Dummy,
 }
 
+/// A bit-wise cursor used to decode aligned PER messagses.
 pub struct Decoder<'a> {
     data: &'a [u8],
     len: usize,
@@ -21,6 +22,7 @@ pub struct Decoder<'a> {
 }
 
 impl<'a> Decoder<'a> {
+    /// Construct a new `Decoder` with an array of bytes.
     pub fn new(data: &'a [u8]) -> Decoder {
         Decoder {
             data: data,
@@ -29,6 +31,9 @@ impl<'a> Decoder<'a> {
         }
     }
 
+    /// Read `n` bits. Where 0 <= n <= 8. See [read_to_vec()](#method.read_to_vec) for larger `n`.
+    /// Returns an `Err` if the read would consume more bits than are available. Else, returns the bits as a u8 with
+    /// left-padding.
     pub fn read(&mut self, n: usize) -> Result<u8, ()> {
         if n == 0 {
             return Ok(0);
@@ -59,6 +64,7 @@ impl<'a> Decoder<'a> {
         Ok(ret)
     }
 
+    /// Read a byte.
     pub fn read_u8(&mut self) -> Result<u8, ()> {
         let ret = self.read(8);
         if ret.is_err() {
@@ -67,6 +73,9 @@ impl<'a> Decoder<'a> {
         Ok(ret.unwrap())
     }
 
+    /// Read `len` bits into `content`.
+    /// Returns an `Err` if the read would consume more bits than are available. Else, the bits as a `u8`s with
+    /// left-padding are pushed onto `content`.
     pub fn read_to_vec(&mut self, content: &mut Vec<u8>, len: usize) -> Result<(), ()> {
         if len == 0 {
             return Ok(());
@@ -88,6 +97,7 @@ impl<'a> Decoder<'a> {
         Ok(())
     }
 
+    /// Decode an Aligned PER length determinant
     pub fn decode_length(&mut self) -> Result<usize, DecodeError> {
         let mut ret = self.read_u8();
         if ret.is_err() {
@@ -109,6 +119,7 @@ impl<'a> Decoder<'a> {
         Ok((b & LENGTH_MASK_SHORT) as usize)
     }
 
+    /// Decode an Aligned PER integer between `min` and `max`
     pub fn decode_int(&mut self, min: Option<i64>, max: Option<i64>) -> Result<i64, DecodeError> {
         if min.is_some() && max.is_some() {
             // constrained
