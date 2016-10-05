@@ -47,7 +47,7 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-80' class='srclink' href='../../src/asn1/src/aper/mod.rs.html#185-197' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-80' class='srclink' href='../../src/asn1/src/aper/mod.rs.html#190-202' title='goto source code'>[src]</a></span></h1>
 <pre class='rust trait'>pub trait APerElement {
     type <a href='#associatedtype.Result' class='type'>Result</a>;
 
@@ -58,7 +58,7 @@
 }</pre><div class='docblock'><p>Trait for Aligned PER encoding/decoding.</p>
 
 <h1 id='examples' class='section-header'><a href='#examples'>Examples</a></h1>
-<p>Consider a simple ASN.1 Sequence <code>foo</code> made up of a <code>BitString</code> and a 32-bit non-negative integer. </p>
+<p>Consider a simple ASN.1 Sequence <code>foo</code> made up of a <code>BitString</code> and a 32-bit non-negative integer.</p>
 
 <pre class='rust rust-example-rendered'>
 <span class='ident'>foo</span> ::<span class='op'>=</span> <span class='ident'>SEQUENCE</span> {
@@ -91,8 +91,11 @@
 
        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>baz</span> <span class='op'>=</span> <span class='ident'>u32</span>::<span class='ident'>from_aper</span>(<span class='ident'>decoder</span>, <span class='ident'>UNCONSTRAINED</span>);
 
-       <span class='kw'>if</span> <span class='ident'>bar</span>.<span class='ident'>is_err</span>() <span class='op'>||</span> <span class='ident'>baz</span>.<span class='ident'>is_err</span>() {
-           <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>aper</span>::<span class='ident'>DecodeError</span>::<span class='ident'>Dummy</span>);
+       <span class='kw'>if</span> <span class='ident'>bar</span>.<span class='ident'>is_err</span>() {
+           <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>bar</span>.<span class='ident'>err</span>().<span class='ident'>unwrap</span>());
+       }
+       <span class='kw'>if</span> <span class='ident'>baz</span>.<span class='ident'>is_err</span>() {
+           <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>baz</span>.<span class='ident'>err</span>().<span class='ident'>unwrap</span>());
        }
 
        <span class='prelude-val'>Ok</span>(<span class='ident'>Foo</span>{
@@ -138,7 +141,7 @@
     <span class='ident'>bar</span> { <span class='ident'>a</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span>, },
     <span class='ident'>baz</span> { <span class='ident'>a</span>: <span class='ident'>u8</span>, <span class='ident'>b</span>: <span class='ident'>u16</span>, },
 }
- 
+
 <span class='kw'>impl</span> <span class='ident'>APerElement</span> <span class='kw'>for</span> <span class='ident'>MyMsg</span> {
     <span class='kw'>type</span> <span class='prelude-ty'>Result</span> <span class='op'>=</span> <span class='self'>Self</span>;
     <span class='kw'>const</span> <span class='ident'>TAG</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xBEEF</span>;
@@ -146,14 +149,14 @@
     <span class='kw'>fn</span> <span class='ident'>from_aper</span>(<span class='ident'>decoder</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>aper</span>::<span class='ident'>Decoder</span>, <span class='ident'>constraints</span>: <span class='ident'>Constraints</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='self'>Self</span>::<span class='prelude-ty'>Result</span>, <span class='ident'>aper</span>::<span class='ident'>DecodeError</span><span class='op'>&gt;</span> {
         <span class='kw'>let</span> <span class='ident'>is_ext</span> <span class='op'>=</span> <span class='ident'>ExtensionMarker</span>::<span class='ident'>from_aper</span>(<span class='ident'>decoder</span>, <span class='ident'>UNCONSTRAINED</span>);
         <span class='kw'>if</span> <span class='ident'>is_ext</span>.<span class='ident'>is_err</span>() {
-            <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>aper</span>::<span class='ident'>DecodeError</span>::<span class='ident'>Dummy</span>);
+            <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>is_ext</span>.<span class='ident'>err</span>().<span class='ident'>unwrap</span>());
         }
- 
+
         <span class='kw'>let</span> <span class='ident'>choice</span> <span class='op'>=</span> <span class='ident'>decoder</span>.<span class='ident'>decode_int</span>(<span class='prelude-val'>Some</span>(<span class='number'>0</span>), <span class='prelude-val'>Some</span>(<span class='number'>2</span>));
         <span class='kw'>if</span> <span class='ident'>choice</span>.<span class='ident'>is_err</span>() {
-            <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>aper</span>::<span class='ident'>DecodeError</span>::<span class='ident'>Dummy</span>);
+            <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>choice</span>.<span class='ident'>err</span>().<span class='ident'>unwrap</span>());
         }
- 
+
         <span class='kw'>match</span> <span class='ident'>c</span>.<span class='ident'>unwrap</span>() {
             <span class='number'>0</span> <span class='op'>=&gt;</span> {
                 <span class='kw'>let</span> <span class='ident'>bs</span> <span class='op'>=</span> <span class='ident'>BitString</span>::<span class='ident'>from_aper</span>(<span class='ident'>decoder</span> , <span class='ident'>Constraints</span> {
@@ -161,7 +164,7 @@
                     <span class='ident'>size</span>: <span class='prelude-val'>Some</span>(<span class='ident'>Constraint</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='prelude-val'>Some</span>(<span class='number'>4</span>))),
                 });
                 <span class='kw'>if</span> <span class='ident'>bs</span>.<span class='ident'>is_err</span>() {
-                    <span class='prelude-val'>Err</span>(<span class='ident'>aper</span>::<span class='ident'>DecodeError</span>::<span class='ident'>Dummy</span>)
+                    <span class='prelude-val'>Err</span>(<span class='ident'>bs</span>.<span class='ident'>err</span>().<span class='ident'>unwrap</span>())
                 } <span class='kw'>else</span> {
                     <span class='prelude-val'>Ok</span>(<span class='ident'>MyMsg</span>::<span class='ident'>foo</span>{ <span class='ident'>a</span>: <span class='ident'>bs</span>.<span class='ident'>unwrap</span>(), })
                 }
@@ -172,7 +175,7 @@
                     <span class='ident'>size</span>: <span class='prelude-val'>Some</span>(<span class='ident'>Constraint</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='prelude-val'>Some</span>(<span class='number'>3</span>))),
                 });
                 <span class='kw'>if</span> <span class='ident'>v</span>.<span class='ident'>is_err</span>() {
-                    <span class='prelude-val'>Err</span>(<span class='ident'>aper</span>::<span class='ident'>DecodeError</span>::<span class='ident'>Dummy</span>)
+                    <span class='prelude-val'>Err</span>(<span class='ident'>v</span>.<span class='ident'>err</span>().<span class='ident'>unwrap</span>())
                 } <span class='kw'>else</span> {
                     <span class='prelude-val'>Ok</span>(<span class='ident'>MyMsg</span>::<span class='ident'>bar</span>{ <span class='ident'>a</span>: <span class='ident'>v</span>.<span class='ident'>unwrap</span>(), })
                 }
@@ -180,13 +183,15 @@
             <span class='number'>2</span> <span class='op'>=&gt;</span> {
                 <span class='kw'>let</span> <span class='ident'>a</span> <span class='op'>=</span> <span class='ident'>u8</span>::<span class='ident'>from_aper</span>(<span class='ident'>decoder</span>, <span class='ident'>UNCONSTRAINED</span>);
                 <span class='kw'>let</span> <span class='ident'>b</span> <span class='op'>=</span> <span class='ident'>u16</span>::<span class='ident'>from_aper</span>(<span class='ident'>decoder</span>, <span class='ident'>UNCONSTRAINED</span>);
-                <span class='kw'>if</span> <span class='ident'>a</span>.<span class='ident'>is_err</span>() <span class='op'>||</span> <span class='ident'>b</span>.<span class='ident'>is_err</span>() {
-                    <span class='prelude-val'>Err</span>(<span class='ident'>aper</span>::<span class='ident'>DecodeError</span>::<span class='ident'>Dummy</span>)
+                <span class='kw'>if</span> <span class='ident'>a</span>.<span class='ident'>is_err</span>() {
+                    <span class='prelude-val'>Err</span>(<span class='ident'>a</span>.<span class='ident'>err</span>().<span class='ident'>unwrap</span>())
+                } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>b</span>.<span class='ident'>is_err</span>() {
+                    <span class='prelude-val'>Err</span>(<span class='ident'>b</span>.<span class='ident'>err</span>().<span class='ident'>unwrap</span>())
                 } <span class='kw'>else</span> {
                     <span class='prelude-val'>Ok</span>(<span class='ident'>MyMsg</span>::<span class='ident'>baz</span>{ <span class='ident'>a</span>: <span class='ident'>a</span>.<span class='ident'>unwrap</span>(), <span class='ident'>b</span>: <span class='ident'>b</span>.<span class='ident'>unwrap</span>(), })
                 }
             }
-            _ <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='ident'>aper</span>::<span class='ident'>DecodeError</span>::<span class='ident'>Dummy</span>)
+            _ <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='ident'>aper</span>::<span class='ident'>DecodeError</span>::<span class='ident'>InvalidChoice</span>)
         }
     }
 }<a class='test-arrow' target='_blank' href=''>Run</a></pre>

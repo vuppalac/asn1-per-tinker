@@ -239,6 +239,11 @@
 <span id="195">195</span>
 <span id="196">196</span>
 <span id="197">197</span>
+<span id="198">198</span>
+<span id="199">199</span>
+<span id="200">200</span>
+<span id="201">201</span>
+<span id="202">202</span>
 </pre><pre class='rust '>
 <span class='kw'>mod</span> <span class='ident'>decoder</span>;
 <span class='kw'>pub</span> <span class='kw'>use</span> <span class='self'>self</span>::<span class='ident'>decoder</span>::{<span class='ident'>Decoder</span>, <span class='ident'>DecodeError</span>};
@@ -288,7 +293,7 @@
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// # Examples</span>
 <span class='doccomment'>///</span>
-<span class='doccomment'>/// Consider a simple ASN.1 Sequence `foo` made up of a `BitString` and a 32-bit non-negative integer. </span>
+<span class='doccomment'>/// Consider a simple ASN.1 Sequence `foo` made up of a `BitString` and a 32-bit non-negative integer.</span>
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// ```</span>
 <span class='doccomment'>/// foo ::= SEQUENCE {</span>
@@ -322,8 +327,11 @@
 <span class='doccomment'>///</span>
 <span class='doccomment'>///        let mut baz = u32::from_aper(decoder, UNCONSTRAINED);</span>
 <span class='doccomment'>///</span>
-<span class='doccomment'>///        if bar.is_err() || baz.is_err() {</span>
-<span class='doccomment'>///            return Err(aper::DecodeError::Dummy);</span>
+<span class='doccomment'>///        if bar.is_err() {</span>
+<span class='doccomment'>///            return Err(bar.err().unwrap());</span>
+<span class='doccomment'>///        }</span>
+<span class='doccomment'>///        if baz.is_err() {</span>
+<span class='doccomment'>///            return Err(baz.err().unwrap());</span>
 <span class='doccomment'>///        }</span>
 <span class='doccomment'>///</span>
 <span class='doccomment'>///        Ok(Foo{</span>
@@ -371,7 +379,7 @@
 <span class='doccomment'>///     bar { a: Vec&lt;u8&gt;, },</span>
 <span class='doccomment'>///     baz { a: u8, b: u16, },</span>
 <span class='doccomment'>/// }</span>
-<span class='doccomment'>/// </span>
+<span class='doccomment'>///</span>
 <span class='doccomment'>/// impl APerElement for MyMsg {</span>
 <span class='doccomment'>///     type Result = Self;</span>
 <span class='doccomment'>///     const TAG: u32 = 0xBEEF;</span>
@@ -379,14 +387,14 @@
 <span class='doccomment'>///     fn from_aper(decoder: &amp;mut aper::Decoder, constraints: Constraints) -&gt; Result&lt;Self::Result, aper::DecodeError&gt; {</span>
 <span class='doccomment'>///         let is_ext = ExtensionMarker::from_aper(decoder, UNCONSTRAINED);</span>
 <span class='doccomment'>///         if is_ext.is_err() {</span>
-<span class='doccomment'>///             return Err(aper::DecodeError::Dummy);</span>
+<span class='doccomment'>///             return Err(is_ext.err().unwrap());</span>
 <span class='doccomment'>///         }</span>
-<span class='doccomment'>/// </span>
+<span class='doccomment'>///</span>
 <span class='doccomment'>///         let choice = decoder.decode_int(Some(0), Some(2));</span>
 <span class='doccomment'>///         if choice.is_err() {</span>
-<span class='doccomment'>///             return Err(aper::DecodeError::Dummy);</span>
+<span class='doccomment'>///             return Err(choice.err().unwrap());</span>
 <span class='doccomment'>///         }</span>
-<span class='doccomment'>/// </span>
+<span class='doccomment'>///</span>
 <span class='doccomment'>///         match c.unwrap() {</span>
 <span class='doccomment'>///             0 =&gt; {</span>
 <span class='doccomment'>///                 let bs = BitString::from_aper(decoder , Constraints {</span>
@@ -394,7 +402,7 @@
 <span class='doccomment'>///                     size: Some(Constraint::new(None, Some(4))),</span>
 <span class='doccomment'>///                 });</span>
 <span class='doccomment'>///                 if bs.is_err() {</span>
-<span class='doccomment'>///                     Err(aper::DecodeError::Dummy)</span>
+<span class='doccomment'>///                     Err(bs.err().unwrap())</span>
 <span class='doccomment'>///                 } else {</span>
 <span class='doccomment'>///                     Ok(MyMsg::foo{ a: bs.unwrap(), })</span>
 <span class='doccomment'>///                 }</span>
@@ -405,7 +413,7 @@
 <span class='doccomment'>///                     size: Some(Constraint::new(None, Some(3))),</span>
 <span class='doccomment'>///                 });</span>
 <span class='doccomment'>///                 if v.is_err() {</span>
-<span class='doccomment'>///                     Err(aper::DecodeError::Dummy)</span>
+<span class='doccomment'>///                     Err(v.err().unwrap())</span>
 <span class='doccomment'>///                 } else {</span>
 <span class='doccomment'>///                     Ok(MyMsg::bar{ a: v.unwrap(), })</span>
 <span class='doccomment'>///                 }</span>
@@ -413,13 +421,15 @@
 <span class='doccomment'>///             2 =&gt; {</span>
 <span class='doccomment'>///                 let a = u8::from_aper(decoder, UNCONSTRAINED);</span>
 <span class='doccomment'>///                 let b = u16::from_aper(decoder, UNCONSTRAINED);</span>
-<span class='doccomment'>///                 if a.is_err() || b.is_err() {</span>
-<span class='doccomment'>///                     Err(aper::DecodeError::Dummy)</span>
+<span class='doccomment'>///                 if a.is_err() {</span>
+<span class='doccomment'>///                     Err(a.err().unwrap())</span>
+<span class='doccomment'>///                 } else if b.is_err() {</span>
+<span class='doccomment'>///                     Err(b.err().unwrap())</span>
 <span class='doccomment'>///                 } else {</span>
 <span class='doccomment'>///                     Ok(MyMsg::baz{ a: a.unwrap(), b: b.unwrap(), })</span>
 <span class='doccomment'>///                 }</span>
 <span class='doccomment'>///             }</span>
-<span class='doccomment'>///             _ =&gt; Err(aper::DecodeError::Dummy)</span>
+<span class='doccomment'>///             _ =&gt; Err(aper::DecodeError::InvalidChoice)</span>
 <span class='doccomment'>///         }</span>
 <span class='doccomment'>///     }</span>
 <span class='doccomment'>/// }</span>

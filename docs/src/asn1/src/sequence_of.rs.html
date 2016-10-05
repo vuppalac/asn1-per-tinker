@@ -114,7 +114,7 @@
     <span class='doccomment'>/// Read a `Vec[T]` from an aligned PER encoding.</span>
     <span class='kw'>fn</span> <span class='ident'>from_aper</span>(<span class='ident'>decoder</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Decoder</span>, <span class='ident'>constraints</span>: <span class='ident'>Constraints</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='self'>Self</span>::<span class='prelude-ty'>Result</span>, <span class='ident'>DecodeError</span><span class='op'>&gt;</span> {
         <span class='kw'>if</span> <span class='ident'>constraints</span>.<span class='ident'>size</span>.<span class='ident'>is_none</span>() {
-            <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>DecodeError</span>::<span class='ident'>Dummy</span>); <span class='comment'>// XXX: meaningful error here</span>
+            <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>DecodeError</span>::<span class='ident'>MissingSizeConstraint</span>);
         }
         <span class='kw'>let</span> <span class='ident'>sz_constr</span> <span class='op'>=</span> <span class='ident'>constraints</span>.<span class='ident'>size</span>.<span class='ident'>unwrap</span>();
 
@@ -128,7 +128,7 @@
         }
 
         <span class='kw'>if</span> <span class='ident'>max_len</span> <span class='op'>&gt;=</span> <span class='number'>65535</span> {
-            <span class='macro'>unimplemented</span><span class='macro'>!</span>();
+            <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>DecodeError</span>::<span class='ident'>NotImplemented</span>);
         }
 
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>len</span>: <span class='ident'>usize</span> <span class='op'>=</span> <span class='number'>0</span>;
@@ -137,7 +137,7 @@
         } <span class='kw'>else</span> {
             <span class='kw'>let</span> <span class='ident'>ret</span> <span class='op'>=</span> <span class='ident'>decoder</span>.<span class='ident'>decode_length</span>();
             <span class='kw'>if</span> <span class='ident'>ret</span>.<span class='ident'>is_err</span>() {
-                <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>DecodeError</span>::<span class='ident'>Dummy</span>); <span class='comment'>// XXX: meaningful error code</span>
+                <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>ret</span>.<span class='ident'>err</span>().<span class='ident'>unwrap</span>());
             }
             <span class='ident'>len</span> <span class='op'>=</span> <span class='ident'>ret</span>.<span class='ident'>unwrap</span>();
         }
@@ -151,7 +151,7 @@
         <span class='kw'>for</span> _ <span class='kw'>in</span> <span class='number'>0</span>..<span class='ident'>len</span> {
             <span class='kw'>let</span> <span class='ident'>ret</span> <span class='op'>=</span> <span class='ident'>T</span>::<span class='ident'>from_aper</span>(<span class='ident'>decoder</span>, <span class='ident'>el_constrs</span>);
             <span class='kw'>if</span> <span class='ident'>ret</span>.<span class='ident'>is_err</span>() {
-                <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>DecodeError</span>::<span class='ident'>Dummy</span>); <span class='comment'>// XXX: meaningful error here</span>
+                <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>ret</span>.<span class='ident'>err</span>().<span class='ident'>unwrap</span>());
             }
             <span class='ident'>content</span>.<span class='ident'>push</span>(<span class='ident'>ret</span>.<span class='ident'>unwrap</span>());
         }

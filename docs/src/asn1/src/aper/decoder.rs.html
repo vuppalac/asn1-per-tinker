@@ -299,6 +299,13 @@
 <span id="255">255</span>
 <span id="256">256</span>
 <span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
 </pre><pre class='rust '>
 <span class='kw'>use</span> <span class='ident'>byteorder</span>::{<span class='ident'>ByteOrder</span>, <span class='ident'>BigEndian</span>, <span class='ident'>ReadBytesExt</span>, <span class='ident'>WriteBytesExt</span>};
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::{<span class='self'>self</span>, <span class='ident'>BufRead</span>, <span class='ident'>Read</span>, <span class='ident'>Write</span>, <span class='ident'>Cursor</span>};
@@ -313,7 +320,13 @@
 
 <span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Debug</span>, <span class='ident'>PartialEq</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>DecodeError</span> {
-    <span class='ident'>Dummy</span>,
+    <span class='ident'>InvalidChoice</span>,
+    <span class='ident'>MalformedLength</span>,
+    <span class='ident'>MalformedInt</span>,
+    <span class='ident'>MissingSizeConstraint</span>,
+    <span class='ident'>MissingValueConstraint</span>,
+    <span class='ident'>NotEnoughBits</span>,
+    <span class='ident'>NotImplemented</span>,
 }
 
 <span class='doccomment'>/// A bit-wise cursor used to decode aligned PER messagses.</span>
@@ -354,7 +367,7 @@
     <span class='doccomment'>/// In some cases, elements of aligned PER messages will be encoded using only the minimum number of bits required to</span>
     <span class='doccomment'>/// express the value without alignment on a byte boundary. `read` allows you to decode these fields.</span>
     <span class='doccomment'>///</span>
-    <span class='doccomment'>/// For example, consider a bit field that only occupies three bits.  </span>
+    <span class='doccomment'>/// For example, consider a bit field that only occupies three bits.</span>
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// ```</span>
     <span class='doccomment'>/// let data = b&quot;\xe0&quot;;</span>
@@ -362,12 +375,12 @@
     <span class='doccomment'>/// let x = d.read(3).unwrap();</span>
     <span class='doccomment'>/// println!(&quot;x = 0x{:X}&quot;); // Prints x = 0x07</span>
     <span class='doccomment'>/// ```</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>read</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>n</span>: <span class='ident'>usize</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>u8</span>, ()<span class='op'>&gt;</span> {
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>read</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>n</span>: <span class='ident'>usize</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>u8</span>, <span class='ident'>DecodeError</span><span class='op'>&gt;</span> {
         <span class='kw'>if</span> <span class='ident'>n</span> <span class='op'>==</span> <span class='number'>0</span> {
             <span class='kw'>return</span> <span class='prelude-val'>Ok</span>(<span class='number'>0</span>);
         }
         <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>pos</span> <span class='op'>+</span> <span class='ident'>n</span> <span class='op'>&gt;</span> <span class='self'>self</span>.<span class='ident'>len</span> {
-            <span class='kw'>return</span> <span class='prelude-val'>Err</span>(());
+            <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>DecodeError</span>::<span class='ident'>NotEnoughBits</span>);
         }
 
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>l_bucket</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>pos</span> <span class='op'>/</span> <span class='number'>8</span>;
@@ -393,10 +406,10 @@
     }
 
     <span class='doccomment'>/// Read a byte.</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>read_u8</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>u8</span>, ()<span class='op'>&gt;</span> {
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>read_u8</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>u8</span>, <span class='ident'>DecodeError</span><span class='op'>&gt;</span> {
         <span class='kw'>let</span> <span class='ident'>ret</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>read</span>(<span class='number'>8</span>);
         <span class='kw'>if</span> <span class='ident'>ret</span>.<span class='ident'>is_err</span>() {
-            <span class='kw'>return</span> <span class='prelude-val'>Err</span>(());
+            <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>DecodeError</span>::<span class='ident'>NotEnoughBits</span>);
         }
         <span class='prelude-val'>Ok</span>(<span class='ident'>ret</span>.<span class='ident'>unwrap</span>())
     }
@@ -416,12 +429,12 @@
     <span class='doccomment'>/// self.read_to_vec(&amp;mut content, 12).unwrap();</span>
     <span class='doccomment'>/// println!(&quot;x = {:?}&quot;); // Prints x = [255, 15]</span>
     <span class='doccomment'>/// ```</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>read_to_vec</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>content</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span>, <span class='ident'>len</span>: <span class='ident'>usize</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(), ()<span class='op'>&gt;</span> {
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>read_to_vec</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>content</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span>, <span class='ident'>len</span>: <span class='ident'>usize</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(), <span class='ident'>DecodeError</span><span class='op'>&gt;</span> {
         <span class='kw'>if</span> <span class='ident'>len</span> <span class='op'>==</span> <span class='number'>0</span> {
             <span class='kw'>return</span> <span class='prelude-val'>Ok</span>(());
         }
         <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>pos</span> <span class='op'>+</span> <span class='ident'>len</span> <span class='op'>&gt;</span> <span class='self'>self</span>.<span class='ident'>len</span> {
-            <span class='kw'>return</span> <span class='prelude-val'>Err</span>(());
+            <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>DecodeError</span>::<span class='ident'>NotEnoughBits</span>);
         }
 
         <span class='kw'>if</span> <span class='ident'>len</span> <span class='op'>&lt;</span> <span class='number'>8</span> {
@@ -441,17 +454,18 @@
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>decode_length</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>usize</span>, <span class='ident'>DecodeError</span><span class='op'>&gt;</span> {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>ret</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>read_u8</span>();
         <span class='kw'>if</span> <span class='ident'>ret</span>.<span class='ident'>is_err</span>() {
-            <span class='macro'>unreachable</span><span class='macro'>!</span>(); <span class='comment'>// XXX: use meaninful error code here</span>
+            <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>DecodeError</span>::<span class='ident'>MalformedLength</span>);
         }
 
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>b</span> <span class='op'>=</span> <span class='ident'>ret</span>.<span class='ident'>unwrap</span>();
         <span class='kw'>if</span> <span class='ident'>b</span> <span class='kw-2'>&amp;</span> <span class='ident'>LENGTH_DET_FRAG</span> <span class='op'>&gt;</span> <span class='number'>0</span> {
             <span class='macro'>unimplemented</span><span class='macro'>!</span>();
+            <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>DecodeError</span>::<span class='ident'>NotImplemented</span>);
         } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>b</span> <span class='kw-2'>&amp;</span> <span class='ident'>LENGTH_DET_LONG</span> <span class='op'>&gt;</span> <span class='number'>0</span> {
             <span class='kw'>let</span> <span class='ident'>len</span>: <span class='ident'>usize</span> <span class='op'>=</span> (<span class='ident'>b</span> <span class='kw-2'>&amp;</span> <span class='ident'>LENGTH_MASK_LONG</span>) <span class='kw'>as</span> <span class='ident'>usize</span>;
             <span class='ident'>ret</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>read_u8</span>();
             <span class='kw'>if</span> <span class='ident'>ret</span>.<span class='ident'>is_err</span>() {
-                <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>DecodeError</span>::<span class='ident'>Dummy</span>); <span class='comment'>// XXX: return meaningful error here</span>
+                <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>DecodeError</span>::<span class='ident'>MalformedLength</span>);
             }
             <span class='ident'>b</span> <span class='op'>=</span> <span class='ident'>ret</span>.<span class='ident'>unwrap</span>();
             <span class='kw'>return</span> <span class='prelude-val'>Ok</span>((<span class='ident'>len</span> <span class='op'>&lt;&lt;</span> <span class='number'>8</span>) <span class='op'>+</span> <span class='ident'>b</span> <span class='kw'>as</span> <span class='ident'>usize</span>);
@@ -475,7 +489,7 @@
     <span class='doccomment'>/// let mut d = aper::Decoder::new(data);</span>
     <span class='doccomment'>/// let x = d.decode_int(Some(500), Some(503)).unwrap();</span>
     <span class='doccomment'>/// let y = d.decode_int(Some(500), Some(503)).unwrap();</span>
-    <span class='doccomment'>/// println!(&quot;x = {}&quot;, x); // Prints x = 501 </span>
+    <span class='doccomment'>/// println!(&quot;x = {}&quot;, x); // Prints x = 501</span>
     <span class='doccomment'>/// println!(&quot;y = {}&quot;, y); // Prints y = 503</span>
     <span class='doccomment'>/// ```</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>decode_int</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>min</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>i64</span><span class='op'>&gt;</span>, <span class='ident'>max</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>i64</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>i64</span>, <span class='ident'>DecodeError</span><span class='op'>&gt;</span> {
@@ -489,7 +503,7 @@
             <span class='kw'>if</span> <span class='ident'>n_bits</span> <span class='op'>&lt;</span> <span class='number'>8</span> {
                 <span class='kw'>let</span> <span class='ident'>ret</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>read</span>(<span class='ident'>n_bits</span>);
                 <span class='kw'>if</span> <span class='ident'>ret</span>.<span class='ident'>is_err</span>() {
-                    <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>DecodeError</span>::<span class='ident'>Dummy</span>); <span class='comment'>// XXX: meaningful error here</span>
+                    <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>ret</span>.<span class='ident'>err</span>().<span class='ident'>unwrap</span>());
                 }
                 <span class='kw'>return</span> <span class='prelude-val'>Ok</span>(<span class='ident'>ret</span>.<span class='ident'>unwrap</span>() <span class='kw'>as</span> <span class='ident'>i64</span> <span class='op'>+</span> <span class='ident'>l</span>);
             }
@@ -498,14 +512,14 @@
             <span class='kw'>if</span> <span class='ident'>n_bits</span> <span class='op'>&lt;=</span> <span class='number'>16</span> {
                 <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>ret</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>read_u8</span>();
                 <span class='kw'>if</span> <span class='ident'>ret</span>.<span class='ident'>is_err</span>() {
-                    <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>DecodeError</span>::<span class='ident'>Dummy</span>); <span class='comment'>// XXX: meaningful error here</span>
+                    <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>ret</span>.<span class='ident'>err</span>().<span class='ident'>unwrap</span>());
                 }
 
                 <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>b</span>: <span class='ident'>u16</span> <span class='op'>=</span> <span class='ident'>ret</span>.<span class='ident'>unwrap</span>() <span class='kw'>as</span> <span class='ident'>u16</span>;
                 <span class='kw'>if</span> <span class='ident'>n_bits</span> <span class='op'>&gt;</span> <span class='number'>8</span> {
                     <span class='ident'>ret</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>read_u8</span>();
                     <span class='kw'>if</span> <span class='ident'>ret</span>.<span class='ident'>is_err</span>() {
-                        <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>DecodeError</span>::<span class='ident'>Dummy</span>); <span class='comment'>// XXX: meaningful error here</span>
+                        <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>ret</span>.<span class='ident'>err</span>().<span class='ident'>unwrap</span>());
                     }
                     <span class='ident'>b</span> <span class='op'>=</span> (<span class='ident'>ret</span>.<span class='ident'>unwrap</span>() <span class='kw'>as</span> <span class='ident'>u16</span>) <span class='op'>+</span> (<span class='ident'>b</span> <span class='op'>&lt;&lt;</span> <span class='number'>8</span>);
                 }
@@ -515,7 +529,7 @@
             <span class='comment'>// Need to decode length determinant</span>
             <span class='kw'>let</span> <span class='ident'>ret</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>decode_length</span>();
             <span class='kw'>if</span> <span class='ident'>ret</span>.<span class='ident'>is_err</span>() {
-                <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>DecodeError</span>::<span class='ident'>Dummy</span>); <span class='comment'>// XXX: meaningful error code</span>
+                <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>ret</span>.<span class='ident'>err</span>().<span class='ident'>unwrap</span>());
             }
 
             <span class='kw'>let</span> <span class='ident'>len</span>: <span class='ident'>usize</span> <span class='op'>=</span> <span class='ident'>ret</span>.<span class='ident'>unwrap</span>();
@@ -526,26 +540,26 @@
             <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>content</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>with_capacity</span>(<span class='ident'>len</span>);
             <span class='kw'>let</span> <span class='ident'>res</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>read_to_vec</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>content</span>, <span class='ident'>len</span> <span class='op'>*</span> <span class='number'>8</span>);
             <span class='kw'>if</span> <span class='ident'>res</span>.<span class='ident'>is_err</span>() {
-                <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>DecodeError</span>::<span class='ident'>Dummy</span>); <span class='comment'>// XXX: meaningful error code</span>
+                <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>res</span>.<span class='ident'>err</span>().<span class='ident'>unwrap</span>());
             }
 
             <span class='kw'>let</span> <span class='ident'>val</span> <span class='op'>=</span> <span class='ident'>BigEndian</span>::<span class='ident'>read_uint</span>(<span class='kw-2'>&amp;</span><span class='ident'>content</span>.<span class='ident'>as_slice</span>(), <span class='ident'>len</span>) <span class='kw'>as</span> <span class='ident'>i64</span> <span class='op'>+</span> <span class='ident'>l</span>;
             <span class='kw'>if</span> <span class='ident'>val</span> <span class='op'>&lt;</span> <span class='ident'>l</span> <span class='op'>||</span> <span class='ident'>val</span> <span class='op'>&gt;</span> <span class='ident'>h</span> {
-                <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>DecodeError</span>::<span class='ident'>Dummy</span>); <span class='comment'>// XXX: meaningful error code</span>
+                <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>DecodeError</span>::<span class='ident'>MalformedInt</span>);
             }
             <span class='kw'>return</span> <span class='prelude-val'>Ok</span>(<span class='ident'>val</span>);
         }
 
         <span class='kw'>let</span> <span class='ident'>ret</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>decode_length</span>();
         <span class='kw'>if</span> <span class='ident'>ret</span>.<span class='ident'>is_err</span>() {
-            <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>DecodeError</span>::<span class='ident'>Dummy</span>); <span class='comment'>// XXX: meaningful error code</span>
+            <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>ret</span>.<span class='ident'>err</span>().<span class='ident'>unwrap</span>());
         }
 
         <span class='kw'>let</span> <span class='ident'>len</span> <span class='op'>=</span> <span class='ident'>ret</span>.<span class='ident'>unwrap</span>();
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>content</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>with_capacity</span>(<span class='ident'>len</span>);
         <span class='kw'>let</span> <span class='ident'>res</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>read_to_vec</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>content</span>, <span class='ident'>len</span> <span class='op'>*</span> <span class='number'>8</span>);
         <span class='kw'>if</span> <span class='ident'>res</span>.<span class='ident'>is_err</span>() {
-            <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>DecodeError</span>::<span class='ident'>Dummy</span>); <span class='comment'>// XXX: meaningful error code</span>
+            <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>res</span>.<span class='ident'>err</span>().<span class='ident'>unwrap</span>());
         }
 
         <span class='kw'>if</span> <span class='ident'>min</span>.<span class='ident'>is_none</span>() {
