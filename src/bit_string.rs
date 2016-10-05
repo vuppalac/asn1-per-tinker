@@ -2,6 +2,17 @@ use aper::{APerElement, Constraint, Constraints, Decoder, DecodeError};
 use std::cmp;
 
 /// A bit string.
+///
+/// # Examples
+///
+/// ```
+/// extern crate asn1;
+/// use asn1::BitString;
+///
+/// let mut b = BitString::with_len(64);
+/// b.set(0, true);
+/// println!("b[0] = {}", b.is_set(0)); // Prints b[0] = true
+/// ```
 #[derive(Debug)]
 pub struct BitString {
     data: Vec<u8>,
@@ -20,6 +31,18 @@ impl BitString {
     }
 
     /// Consturct a `BitString` of length `n` with initial values contained in `data`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// extern crate asn1;
+    /// use asn1::BitString;
+    /// 
+    /// let v = vec![0x00 as u8, 0x02 as u8];
+    /// let b = BitString::with_bytes_and_len(&v, 15);
+    /// println!("b[0] = {}", b.is_set(0)); // Prints b[0] = false
+    /// println!("b[14] = {}", b.is_set(14)); // Prints b[14] = true
+    /// ```
     pub fn with_bytes_and_len(data: &Vec<u8>, n: usize) -> BitString {
         BitString {
             data: data.clone(),

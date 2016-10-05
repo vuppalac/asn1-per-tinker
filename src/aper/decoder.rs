@@ -15,6 +15,18 @@ pub enum DecodeError {
 }
 
 /// A bit-wise cursor used to decode aligned PER messagses.
+///
+/// # Examples
+///
+/// ```
+/// extern crate asn1;
+/// use asn1::aper::{self, APerElement, Constraint, Constraints, UNCONSTRAINED};
+///
+/// let data = b"\x80\x2b"; // 43
+/// let mut d = aper::Decoder::new(data);
+/// let x = i16::from_aper(&mut d, UNCONSTRAINED).unwrap();
+/// println!("x = {}", x); // Prints x = 43
+/// ```
 pub struct Decoder<'a> {
     data: &'a [u8],
     len: usize,
@@ -31,9 +43,23 @@ impl<'a> Decoder<'a> {
         }
     }
 
-    /// Read `n` bits. Where 0 <= n <= 8. See [read_to_vec()](#method.read_to_vec) for larger `n`.
+    /// Read `n` bits. Where `0 <= n <= 8`. See [read_to_vec()](#method.read_to_vec) for larger `n`.
     /// Returns an `Err` if the read would consume more bits than are available. Else, returns the bits as a u8 with
     /// left-padding.
+    ///
+    /// # Examples
+    ///
+    /// In some cases, elements of aligned PER messages will be encoded using only the minimum number of bits required to
+    /// express the value without alignment on a byte boundary. `read` allows you to decode these fields.
+    ///
+    /// For example, consider a bit field that only occupies three bits.  
+    ///
+    /// ```
+    /// let data = b"\xe0";
+    /// let mut d = aper::Decoder::new(data);
+    /// let x = d.read(3).unwrap();
+    /// println!("x = 0x{:X}"); // Prints x = 0x07
+    /// ```
     pub fn read(&mut self, n: usize) -> Result<u8, ()> {
         if n == 0 {
             return Ok(0);
@@ -76,6 +102,18 @@ impl<'a> Decoder<'a> {
     /// Read `len` bits into `content`.
     /// Returns an `Err` if the read would consume more bits than are available. Else, the bits as a `u8`s with
     /// left-padding are pushed onto `content`.
+    ///
+    /// # Examples
+    ///
+    /// Some fields may span multiple bytes. `read_to_vec` allows you to decode these fields.
+    ///
+    /// ```
+    /// let data = b"\xff\xf3";
+    /// let mut d = aper::Decoder::new(data);
+    /// let mut x: Vec<u8> = Vec::with_capacity(2);
+    /// self.read_to_vec(&mut content, 12).unwrap();
+    /// println!("x = {:?}"); // Prints x = [255, 15]
+    /// ```
     pub fn read_to_vec(&mut self, content: &mut Vec<u8>, len: usize) -> Result<(), ()> {
         if len == 0 {
             return Ok(());
@@ -97,7 +135,7 @@ impl<'a> Decoder<'a> {
         Ok(())
     }
 
-    /// Decode an Aligned PER length determinant
+    /// Decode an aligned PER length determinant
     pub fn decode_length(&mut self) -> Result<usize, DecodeError> {
         let mut ret = self.read_u8();
         if ret.is_err() {
@@ -120,6 +158,24 @@ impl<'a> Decoder<'a> {
     }
 
     /// Decode an Aligned PER integer between `min` and `max`
+    ///
+    /// You can decode the Rust primitive (u)ints: `i8`, `i16`, `i32`, `u8`, `u16`, and `u32` using their respective
+    /// `from_aper` constructors. `decode_int` is useful if you want to decode an integer field that exists somewhere
+    /// between or beyond the primitive widths.
+    ///
+    /// # Examples
+    ///
+    /// For example, a value in [500, 503] can be encoded using two bits in aligned PER, so using
+    /// `u8` would yield an incorrect value. The code below demonstrates how to decode such a field.
+    ///
+    /// ```
+    /// let data = b"\x70"; // 0111 0000
+    /// let mut d = aper::Decoder::new(data);
+    /// let x = d.decode_int(Some(500), Some(503)).unwrap();
+    /// let y = d.decode_int(Some(500), Some(503)).unwrap();
+    /// println!("x = {}", x); // Prints x = 501 
+    /// println!("y = {}", y); // Prints y = 503
+    /// ```
     pub fn decode_int(&mut self, min: Option<i64>, max: Option<i64>) -> Result<i64, DecodeError> {
         if min.is_some() && max.is_some() {
             // constrained

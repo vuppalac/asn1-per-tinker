@@ -164,11 +164,45 @@
 <span id="120">120</span>
 <span id="121">121</span>
 <span id="122">122</span>
+<span id="123">123</span>
+<span id="124">124</span>
+<span id="125">125</span>
+<span id="126">126</span>
+<span id="127">127</span>
+<span id="128">128</span>
+<span id="129">129</span>
+<span id="130">130</span>
+<span id="131">131</span>
+<span id="132">132</span>
+<span id="133">133</span>
+<span id="134">134</span>
+<span id="135">135</span>
+<span id="136">136</span>
+<span id="137">137</span>
+<span id="138">138</span>
+<span id="139">139</span>
+<span id="140">140</span>
+<span id="141">141</span>
+<span id="142">142</span>
+<span id="143">143</span>
+<span id="144">144</span>
+<span id="145">145</span>
 </pre><pre class='rust '>
 <span class='kw'>use</span> <span class='ident'>aper</span>::{<span class='ident'>APerElement</span>, <span class='ident'>Constraint</span>, <span class='ident'>Constraints</span>, <span class='ident'>Decoder</span>, <span class='ident'>DecodeError</span>};
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>cmp</span>;
 
 <span class='doccomment'>/// A bit string.</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// # Examples</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// ```</span>
+<span class='doccomment'>/// extern crate asn1;</span>
+<span class='doccomment'>/// use asn1::BitString;</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// let mut b = BitString::with_len(64);</span>
+<span class='doccomment'>/// b.set(0, true);</span>
+<span class='doccomment'>/// println!(&quot;b[0] = {}&quot;, b.is_set(0)); // Prints b[0] = true</span>
+<span class='doccomment'>/// ```</span>
 <span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Debug</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>BitString</span> {
     <span class='ident'>data</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span>,
@@ -187,6 +221,18 @@
     }
 
     <span class='doccomment'>/// Consturct a `BitString` of length `n` with initial values contained in `data`.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// # Examples</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// ```</span>
+    <span class='doccomment'>/// extern crate asn1;</span>
+    <span class='doccomment'>/// use asn1::BitString;</span>
+    <span class='doccomment'>/// </span>
+    <span class='doccomment'>/// let v = vec![0x00 as u8, 0x02 as u8];</span>
+    <span class='doccomment'>/// let b = BitString::with_bytes_and_len(&amp;v, 15);</span>
+    <span class='doccomment'>/// println!(&quot;b[0] = {}&quot;, b.is_set(0)); // Prints b[0] = false</span>
+    <span class='doccomment'>/// println!(&quot;b[14] = {}&quot;, b.is_set(14)); // Prints b[14] = true</span>
+    <span class='doccomment'>/// ```</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>with_bytes_and_len</span>(<span class='ident'>data</span>: <span class='kw-2'>&amp;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span>, <span class='ident'>n</span>: <span class='ident'>usize</span>) <span class='op'>-&gt;</span> <span class='ident'>BitString</span> {
         <span class='ident'>BitString</span> {
             <span class='ident'>data</span>: <span class='ident'>data</span>.<span class='ident'>clone</span>(),

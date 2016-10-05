@@ -47,14 +47,61 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-0' class='srclink' href='../src/asn1/src/lib.rs.html#1-19' title='goto source code'>[src]</a></span></h1>
-<h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
+               </span><a id='src-0' class='srclink' href='../src/asn1/src/lib.rs.html#1-37' title='goto source code'>[src]</a></span></h1>
+<div class='docblock'><p>This library provides tools for decoding/encoding ASN.1 messages to/from their corresponding Rust types.</p>
+
+<h1 id='asn1-type-correspondence' class='section-header'><a href='#asn1-type-correspondence'>ASN.1 Type Correspondence</a></h1>
+<p>Below are the currently supported ASN.1 types and their corresponding types/constructs in Rust.</p>
+
+<table>
+<thead>
+<tr>
+<th>ASN.1 Type</th>
+<th>Rust Type</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>BIT STRING</td>
+<td>BitString</td>
+</tr>
+<tr>
+<td>INTEGER*</td>
+<td>i8,i16,i32,u8,u16,u32</td>
+</tr>
+<tr>
+<td>NULL</td>
+<td>()</td>
+</tr>
+<tr>
+<td>OCTET STRING</td>
+<td>Vec&lt;u8&gt;</td>
+</tr>
+<tr>
+<td>SEQUENCE</td>
+<td>struct</td>
+</tr>
+<tr>
+<td>SEQUENCE OF</td>
+<td>Vec&lt;T&gt;</td>
+</tr>
+<tr>
+<td>CHOICE</td>
+<td>enum</td>
+</tr>
+</tbody>
+</table>
+
+<p>*<code>INTEGER</code> fields of arbitrary widths (in PER encodings) can be decoded as long as they fit in an <code>i64</code>
+(see <a href="aper/struct.Decoder.html#method.decode_int">aper::Decoder::decode_int</a>).</p>
+</div><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
 <table>
                        <tr class=' module-item'>
                            <td><a class='mod' href='aper/index.html'
                                   title='asn1::aper'>aper</a></td>
                            <td class='docblock-short'>
-                                <p>A module for encoding and decoding ASN.1 messages of the Aligned PER flavor.</p>
+                                <p>Tools for encoding and decoding ASN.1 messages of the Aligned PER flavor.</p>
                            </td>
                        </tr></table><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
 <table>

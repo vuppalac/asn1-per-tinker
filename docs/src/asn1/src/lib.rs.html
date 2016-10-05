@@ -61,11 +61,47 @@
 <span id="17">17</span>
 <span id="18">18</span>
 <span id="19">19</span>
+<span id="20">20</span>
+<span id="21">21</span>
+<span id="22">22</span>
+<span id="23">23</span>
+<span id="24">24</span>
+<span id="25">25</span>
+<span id="26">26</span>
+<span id="27">27</span>
+<span id="28">28</span>
+<span id="29">29</span>
+<span id="30">30</span>
+<span id="31">31</span>
+<span id="32">32</span>
+<span id="33">33</span>
+<span id="34">34</span>
+<span id="35">35</span>
+<span id="36">36</span>
+<span id="37">37</span>
 </pre><pre class='rust '>
+<span class='doccomment'>//! This library provides tools for decoding/encoding ASN.1 messages to/from their corresponding Rust types.</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! # ASN.1 Type Correspondence</span>
+<span class='doccomment'>//! </span>
+<span class='doccomment'>//! Below are the currently supported ASN.1 types and their corresponding types/constructs in Rust.</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! | ASN.1 Type     | Rust Type             |</span>
+<span class='doccomment'>//! |----------------|-----------------------|</span>
+<span class='doccomment'>//! | BIT STRING     | BitString             |</span>
+<span class='doccomment'>//! | INTEGER*       | i8,i16,i32,u8,u16,u32 |</span>
+<span class='doccomment'>//! | NULL           | ()                    |</span>
+<span class='doccomment'>//! | OCTET STRING   | Vec\&lt;u8\&gt;             |</span>
+<span class='doccomment'>//! | SEQUENCE       | struct                |</span>
+<span class='doccomment'>//! | SEQUENCE OF    | Vec\&lt;T\&gt;              |</span>
+<span class='doccomment'>//! | CHOICE         | enum                  |</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! *`INTEGER` fields of arbitrary widths (in PER encodings) can be decoded as long as they fit in an `i64`</span>
+<span class='doccomment'>//! (see [aper::Decoder::decode_int](aper/struct.Decoder.html#method.decode_int)).</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>feature</span>(<span class='ident'>associated_consts</span>)]</span>
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>byteorder</span>;
 
-<span class='doccomment'>/// A module for encoding and decoding ASN.1 messages of the Aligned PER flavor.</span>
+<span class='doccomment'>/// Tools for encoding and decoding ASN.1 messages of the Aligned PER flavor.</span>
 <span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>aper</span>;
 
 <span class='kw'>mod</span> <span class='ident'>bit_string</span>;
