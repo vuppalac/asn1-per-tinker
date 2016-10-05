@@ -37,7 +37,7 @@ impl BitString {
     /// ```
     /// extern crate asn1;
     /// use asn1::BitString;
-    /// 
+    ///
     /// let v = vec![0x00 as u8, 0x02 as u8];
     /// let b = BitString::with_bytes_and_len(&v, 15);
     /// println!("b[0] = {}", b.is_set(0)); // Prints b[0] = false
@@ -115,7 +115,7 @@ impl APerElement for BitString {
     /// Construct a `BitString` from an aligned PER encoding.
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self::Result, DecodeError> {
         if constraints.size.is_none() {
-            return Err(DecodeError::Dummy); // XXX: meaningful error here
+            return Err(DecodeError::MissingSizeConstraint);
         }
 
         let sz_constr = constraints.size.unwrap();
@@ -132,7 +132,7 @@ impl APerElement for BitString {
         let mut content: Vec<u8> = Vec::with_capacity(num_bytes);
         let ret = decoder.read_to_vec(&mut content, len);
         if ret.is_err() {
-            return Err(DecodeError::Dummy); // XXX: meaningful error here
+            return Err(ret.err().unwrap());
         }
 
         let delta = num_bytes * 8 - len;

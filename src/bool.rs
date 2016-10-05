@@ -12,7 +12,7 @@ impl APerElement for bool {
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self::Result, DecodeError> {
         let ret = decoder.read(1);
         if ret.is_err() {
-            return Err(DecodeError::Dummy); // XXX: meaningful error here
+            return Err(ret.err().unwrap());
         }
         Ok(ret.unwrap() > 0)
     }

@@ -46,7 +46,7 @@ pub const UNCONSTRAINED: Constraints = Constraints {
 ///
 /// # Examples
 ///
-/// Consider a simple ASN.1 Sequence `foo` made up of a `BitString` and a 32-bit non-negative integer. 
+/// Consider a simple ASN.1 Sequence `foo` made up of a `BitString` and a 32-bit non-negative integer.
 ///
 /// ```
 /// foo ::= SEQUENCE {
@@ -80,8 +80,11 @@ pub const UNCONSTRAINED: Constraints = Constraints {
 ///
 ///        let mut baz = u32::from_aper(decoder, UNCONSTRAINED);
 ///
-///        if bar.is_err() || baz.is_err() {
-///            return Err(aper::DecodeError::Dummy);
+///        if bar.is_err() {
+///            return Err(bar.err().unwrap());
+///        }
+///        if baz.is_err() {
+///            return Err(baz.err().unwrap());
 ///        }
 ///
 ///        Ok(Foo{
@@ -129,7 +132,7 @@ pub const UNCONSTRAINED: Constraints = Constraints {
 ///     bar { a: Vec<u8>, },
 ///     baz { a: u8, b: u16, },
 /// }
-/// 
+///
 /// impl APerElement for MyMsg {
 ///     type Result = Self;
 ///     const TAG: u32 = 0xBEEF;
@@ -137,14 +140,14 @@ pub const UNCONSTRAINED: Constraints = Constraints {
 ///     fn from_aper(decoder: &mut aper::Decoder, constraints: Constraints) -> Result<Self::Result, aper::DecodeError> {
 ///         let is_ext = ExtensionMarker::from_aper(decoder, UNCONSTRAINED);
 ///         if is_ext.is_err() {
-///             return Err(aper::DecodeError::Dummy);
+///             return Err(is_ext.err().unwrap());
 ///         }
-/// 
+///
 ///         let choice = decoder.decode_int(Some(0), Some(2));
 ///         if choice.is_err() {
-///             return Err(aper::DecodeError::Dummy);
+///             return Err(choice.err().unwrap());
 ///         }
-/// 
+///
 ///         match c.unwrap() {
 ///             0 => {
 ///                 let bs = BitString::from_aper(decoder , Constraints {
@@ -152,7 +155,7 @@ pub const UNCONSTRAINED: Constraints = Constraints {
 ///                     size: Some(Constraint::new(None, Some(4))),
 ///                 });
 ///                 if bs.is_err() {
-///                     Err(aper::DecodeError::Dummy)
+///                     Err(bs.err().unwrap())
 ///                 } else {
 ///                     Ok(MyMsg::foo{ a: bs.unwrap(), })
 ///                 }
@@ -163,7 +166,7 @@ pub const UNCONSTRAINED: Constraints = Constraints {
 ///                     size: Some(Constraint::new(None, Some(3))),
 ///                 });
 ///                 if v.is_err() {
-///                     Err(aper::DecodeError::Dummy)
+///                     Err(v.err().unwrap())
 ///                 } else {
 ///                     Ok(MyMsg::bar{ a: v.unwrap(), })
 ///                 }
@@ -171,13 +174,15 @@ pub const UNCONSTRAINED: Constraints = Constraints {
 ///             2 => {
 ///                 let a = u8::from_aper(decoder, UNCONSTRAINED);
 ///                 let b = u16::from_aper(decoder, UNCONSTRAINED);
-///                 if a.is_err() || b.is_err() {
-///                     Err(aper::DecodeError::Dummy)
+///                 if a.is_err() {
+///                     Err(a.err().unwrap())
+///                 } else if b.is_err() {
+///                     Err(b.err().unwrap())
 ///                 } else {
 ///                     Ok(MyMsg::baz{ a: a.unwrap(), b: b.unwrap(), })
 ///                 }
 ///             }
-///             _ => Err(aper::DecodeError::Dummy)
+///             _ => Err(aper::DecodeError::InvalidChoice)
 ///         }
 ///     }
 /// }

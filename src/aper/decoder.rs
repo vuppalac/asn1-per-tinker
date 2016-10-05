@@ -11,7 +11,13 @@ const LENGTH_MASK_LONG: u8 = 0b0011_1111;
 
 #[derive(Debug, PartialEq)]
 pub enum DecodeError {
-    Dummy,
+    InvalidChoice,
+    MalformedLength,
+    MalformedInt,
+    MissingSizeConstraint,
+    MissingValueConstraint,
+    NotEnoughBits,
+    NotImplemented,
 }
 
 /// A bit-wise cursor used to decode aligned PER messagses.
@@ -52,7 +58,7 @@ impl<'a> Decoder<'a> {
     /// In some cases, elements of aligned PER messages will be encoded using only the minimum number of bits required to
     /// express the value without alignment on a byte boundary. `read` allows you to decode these fields.
     ///
-    /// For example, consider a bit field that only occupies three bits.  
+    /// For example, consider a bit field that only occupies three bits.
     ///
     /// ```
     /// let data = b"\xe0";
@@ -60,12 +66,12 @@ impl<'a> Decoder<'a> {
     /// let x = d.read(3).unwrap();
     /// println!("x = 0x{:X}"); // Prints x = 0x07
     /// ```
-    pub fn read(&mut self, n: usize) -> Result<u8, ()> {
+    pub fn read(&mut self, n: usize) -> Result<u8, DecodeError> {
         if n == 0 {
             return Ok(0);
         }
         if self.pos + n > self.len {
-            return Err(());
+            return Err(DecodeError::NotEnoughBits);
         }
 
         let mut l_bucket = self.pos / 8;
@@ -91,10 +97,10 @@ impl<'a> Decoder<'a> {
     }
 
     /// Read a byte.
-    pub fn read_u8(&mut self) -> Result<u8, ()> {
+    pub fn read_u8(&mut self) -> Result<u8, DecodeError> {
         let ret = self.read(8);
         if ret.is_err() {
-            return Err(());
+            return Err(DecodeError::NotEnoughBits);
         }
         Ok(ret.unwrap())
     }
@@ -114,12 +120,12 @@ impl<'a> Decoder<'a> {
     /// self.read_to_vec(&mut content, 12).unwrap();
     /// println!("x = {:?}"); // Prints x = [255, 15]
     /// ```
-    pub fn read_to_vec(&mut self, content: &mut Vec<u8>, len: usize) -> Result<(), ()> {
+    pub fn read_to_vec(&mut self, content: &mut Vec<u8>, len: usize) -> Result<(), DecodeError> {
         if len == 0 {
             return Ok(());
         }
         if self.pos + len > self.len {
-            return Err(());
+            return Err(DecodeError::NotEnoughBits);
         }
 
         if len < 8 {
@@ -139,17 +145,18 @@ impl<'a> Decoder<'a> {
     pub fn decode_length(&mut self) -> Result<usize, DecodeError> {
         let mut ret = self.read_u8();
         if ret.is_err() {
-            unreachable!(); // XXX: use meaninful error code here
+            return Err(DecodeError::MalformedLength);
         }
 
         let mut b = ret.unwrap();
         if b & LENGTH_DET_FRAG > 0 {
             unimplemented!();
+            return Err(DecodeError::NotImplemented);
         } else if b & LENGTH_DET_LONG > 0 {
             let len: usize = (b & LENGTH_MASK_LONG) as usize;
             ret = self.read_u8();
             if ret.is_err() {
-                return Err(DecodeError::Dummy); // XXX: return meaningful error here
+                return Err(DecodeError::MalformedLength);
             }
             b = ret.unwrap();
             return Ok((len << 8) + b as usize);
@@ -173,7 +180,7 @@ impl<'a> Decoder<'a> {
     /// let mut d = aper::Decoder::new(data);
     /// let x = d.decode_int(Some(500), Some(503)).unwrap();
     /// let y = d.decode_int(Some(500), Some(503)).unwrap();
-    /// println!("x = {}", x); // Prints x = 501 
+    /// println!("x = {}", x); // Prints x = 501
     /// println!("y = {}", y); // Prints y = 503
     /// ```
     pub fn decode_int(&mut self, min: Option<i64>, max: Option<i64>) -> Result<i64, DecodeError> {
@@ -187,7 +194,7 @@ impl<'a> Decoder<'a> {
             if n_bits < 8 {
                 let ret = self.read(n_bits);
                 if ret.is_err() {
-                    return Err(DecodeError::Dummy); // XXX: meaningful error here
+                    return Err(ret.err().unwrap());
                 }
                 return Ok(ret.unwrap() as i64 + l);
             }
@@ -196,14 +203,14 @@ impl<'a> Decoder<'a> {
             if n_bits <= 16 {
                 let mut ret = self.read_u8();
                 if ret.is_err() {
-                    return Err(DecodeError::Dummy); // XXX: meaningful error here
+                    return Err(ret.err().unwrap());
                 }
 
                 let mut b: u16 = ret.unwrap() as u16;
                 if n_bits > 8 {
                     ret = self.read_u8();
                     if ret.is_err() {
-                        return Err(DecodeError::Dummy); // XXX: meaningful error here
+                        return Err(ret.err().unwrap());
                     }
                     b = (ret.unwrap() as u16) + (b << 8);
                 }
@@ -213,7 +220,7 @@ impl<'a> Decoder<'a> {
             // Need to decode length determinant
             let ret = self.decode_length();
             if ret.is_err() {
-                return Err(DecodeError::Dummy); // XXX: meaningful error code
+                return Err(ret.err().unwrap());
             }
 
             let len: usize = ret.unwrap();
@@ -224,26 +231,26 @@ impl<'a> Decoder<'a> {
             let mut content: Vec<u8> = Vec::with_capacity(len);
             let res = self.read_to_vec(&mut content, len * 8);
             if res.is_err() {
-                return Err(DecodeError::Dummy); // XXX: meaningful error code
+                return Err(res.err().unwrap());
             }
 
             let val = BigEndian::read_uint(&content.as_slice(), len) as i64 + l;
             if val < l || val > h {
-                return Err(DecodeError::Dummy); // XXX: meaningful error code
+                return Err(DecodeError::MalformedInt);
             }
             return Ok(val);
         }
 
         let ret = self.decode_length();
         if ret.is_err() {
-            return Err(DecodeError::Dummy); // XXX: meaningful error code
+            return Err(ret.err().unwrap());
         }
 
         let len = ret.unwrap();
         let mut content: Vec<u8> = Vec::with_capacity(len);
         let res = self.read_to_vec(&mut content, len * 8);
         if res.is_err() {
-            return Err(DecodeError::Dummy); // XXX: meaningful error code
+            return Err(res.err().unwrap());
         }
 
         if min.is_none() {

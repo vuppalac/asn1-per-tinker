@@ -1,7 +1,7 @@
 //! This library provides tools for decoding/encoding ASN.1 messages to/from their corresponding Rust types.
 //!
 //! # ASN.1 Type Correspondence
-//! 
+//!
 //! Below are the currently supported ASN.1 types and their corresponding types/constructs in Rust.
 //!
 //! | ASN.1 Type     | Rust Type             |
@@ -34,6 +34,6 @@ pub use bit_string::BitString;
 pub use bool::*;
 pub use extensions::*;
 pub use integer::*;
+pub use null::*;
 pub use sequence::*;
 pub use sequence_of::*;
-pub use null::*;

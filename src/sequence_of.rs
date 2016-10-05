@@ -11,7 +11,7 @@ impl<T: APerElement> APerElement for Vec<T> {
     /// Read a `Vec[T]` from an aligned PER encoding.
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self::Result, DecodeError> {
         if constraints.size.is_none() {
-            return Err(DecodeError::Dummy); // XXX: meaningful error here
+            return Err(DecodeError::MissingSizeConstraint);
         }
         let sz_constr = constraints.size.unwrap();
 
@@ -25,7 +25,7 @@ impl<T: APerElement> APerElement for Vec<T> {
         }
 
         if max_len >= 65535 {
-            unimplemented!();
+            return Err(DecodeError::NotImplemented);
         }
 
         let mut len: usize = 0;
@@ -34,7 +34,7 @@ impl<T: APerElement> APerElement for Vec<T> {
         } else {
             let ret = decoder.decode_length();
             if ret.is_err() {
-                return Err(DecodeError::Dummy); // XXX: meaningful error code
+                return Err(ret.err().unwrap());
             }
             len = ret.unwrap();
         }
@@ -48,7 +48,7 @@ impl<T: APerElement> APerElement for Vec<T> {
         for _ in 0..len {
             let ret = T::from_aper(decoder, el_constrs);
             if ret.is_err() {
-                return Err(DecodeError::Dummy); // XXX: meaningful error here
+                return Err(ret.err().unwrap());
             }
             content.push(ret.unwrap());
         }

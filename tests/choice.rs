@@ -16,12 +16,12 @@ impl APerElement for Foo {
     fn from_aper(decoder: &mut aper::Decoder, constraints: Constraints) -> Result<Self::Result, aper::DecodeError> {
         let is_ext = ExtensionMarker::from_aper(decoder, UNCONSTRAINED);
         if is_ext.is_err() {
-            return Err(aper::DecodeError::Dummy);
+            return Err(is_ext.err().unwrap());
         }
 
         let choice = decoder.decode_int(Some(0), Some(2));
         if choice.is_err() {
-            return Err(aper::DecodeError::Dummy);
+            return Err(choice.err().unwrap());
         }
 
         let c = choice.unwrap();
@@ -33,7 +33,7 @@ impl APerElement for Foo {
                     size: Some(Constraint::new(None, Some(4))),
                 });
                 if bs.is_err() {
-                    Err(aper::DecodeError::Dummy)
+                    Err(bs.err().unwrap())
                 } else {
                     Ok(Foo::foo{ a: bs.unwrap(), })
                 }
@@ -44,7 +44,7 @@ impl APerElement for Foo {
                     size: Some(Constraint::new(None, Some(3))),
                 });
                 if v.is_err() {
-                    Err(aper::DecodeError::Dummy)
+                    Err(v.err().unwrap())
                 } else {
                     Ok(Foo::bar{ a: v.unwrap(), })
                 }
@@ -53,12 +53,12 @@ impl APerElement for Foo {
                 let a = u8::from_aper(decoder, UNCONSTRAINED);
                 let b = u16::from_aper(decoder, UNCONSTRAINED);
                 if a.is_err() || b.is_err() {
-                    Err(aper::DecodeError::Dummy)
+                    Err(a.err().unwrap())
                 } else {
                     Ok(Foo::baz{ a: a.unwrap(), b: b.unwrap(), })
                 }
             }
-            _ => Err(aper::DecodeError::Dummy)
+            _ => Err(aper::DecodeError::InvalidChoice)
         }
     }
 }

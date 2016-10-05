@@ -31,8 +31,14 @@ impl APerElement for Foo {
             size: Some(Constraint::new(None, Some(2))),
         });
 
-        if foo.is_err() || bar.is_err() || baz.is_err() {
-            return Err(aper::DecodeError::Dummy);
+        if foo.is_err() {
+            return Err(foo.err().unwrap());
+        }
+        if bar.is_err() {
+            return Err(bar.err().unwrap());
+        }
+        if baz.is_err() {
+            return Err(baz.err().unwrap());
         }
 
         Ok(Foo{
