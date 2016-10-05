@@ -28,6 +28,7 @@ mod sequence_of;
 mod sequence;
 mod bool;
 mod extensions;
+mod null;
 
 pub use bit_string::BitString;
 pub use bool::*;
@@ -35,3 +36,4 @@ pub use extensions::*;
 pub use integer::*;
 pub use sequence::*;
 pub use sequence_of::*;
+pub use null::*;
