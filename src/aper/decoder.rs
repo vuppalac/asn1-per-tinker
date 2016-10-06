@@ -2,13 +2,6 @@ use byteorder::{ByteOrder, BigEndian, ReadBytesExt, WriteBytesExt};
 use std::io::{self, BufRead, Read, Write, Cursor};
 use super::*;
 
-const LENGTH_DET_SHORT: u8 = 0b0000_0000;
-const LENGTH_DET_LONG: u8 = 0b1000_0000;
-const LENGTH_DET_FRAG: u8 = 0b1100_0000;
-
-const LENGTH_MASK_SHORT: u8 = 0b0111_1111;
-const LENGTH_MASK_LONG: u8 = 0b0011_1111;
-
 #[derive(Debug, PartialEq)]
 pub enum DecodeError {
     InvalidChoice,

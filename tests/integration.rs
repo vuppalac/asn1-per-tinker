@@ -1,8 +1,9 @@
 #![feature(associated_consts)]
 extern crate asn1;
 use asn1::BitString;
-use asn1::aper::{self, APerElement, Constraint, Constraints, UNCONSTRAINED};
+use asn1::aper::{self, APerElement, Constraint, Constraints, Encoding, UNCONSTRAINED};
 
+#[derive(Debug)]
 struct Foo {
     pub foo: BitString,
     pub bar: Vec<u8>,
@@ -47,10 +48,46 @@ impl APerElement for Foo {
             baz: baz.unwrap(),
         })
     }
+    
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, aper::EncodeError> {
+        let mut enc = self.foo.to_aper(Constraints {
+            value: None,
+            size: Some(Constraint::new(None, Some(4))),
+        }).unwrap();
+
+        enc.append(&self.bar.to_aper(Constraints {
+            value: None,
+            size: Some(Constraint::new(None, Some(3))),
+        }).unwrap());
+
+        enc.append(&self.baz.to_aper(Constraints {
+            // here the "value" constraint is a constraint on the size of each element
+            value: Some(Constraint::new(None, Some(4))), 
+            // "size" behaves normally 
+            size: Some(Constraint::new(None, Some(2))),
+        }).unwrap());
+
+        Ok(enc)
+    }
+}
+
+#[test]
+fn encode_foo() {
+    let x = Foo {
+        foo: BitString::with_bytes_and_len(&vec![0x0e], 4),
+        bar: vec![0x46, 0x4f, 0x4f],
+        baz: vec![
+            BitString::with_bytes_and_len(&vec![0x0e], 4),
+            BitString::with_bytes_and_len(&vec![0x0e], 4),
+        ],
+    };
+    let target: Vec<u8> = vec![0xe0, 0x34, 0x64, 0xf4, 0xf0, 0x2e, 0xe0];
+    assert_eq!(target, *x.to_aper(UNCONSTRAINED).unwrap().bytes());
 }
 
 #[test]
 fn decode_foo() {
+    // [14, 3, 70, 79, 79, 2, 224, 224]
     let data = b"\x0e\x03\x46\x4f\x4f\x02\xee";
     let mut d = aper::Decoder::new(data);
     d.read(4); // strip left-padding

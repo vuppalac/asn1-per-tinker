@@ -71,3 +71,13 @@ fn decode_unpadded() {
         }
     }
 }
+
+#[test]
+fn encode_padded_small() {
+    let bs = BitString::with_bytes_and_len(&vec![0x0e as u8], 4);
+    let target: Vec<u8> = vec![0xe0];
+    assert_eq!(target, *bs.to_aper(Constraints{
+        value: None,
+        size: Some(Constraint::new(None, Some(4))),
+    }).unwrap().bytes());
+}

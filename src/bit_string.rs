@@ -1,5 +1,6 @@
-use aper::{APerElement, Constraint, Constraints, Decoder, DecodeError};
+use aper::{APerElement, Constraint, Constraints, Decoder, DecodeError, Encoding, EncodeError};
 use std::cmp;
+use utils::shift_bytes_left;
 
 /// A bit string.
 ///
@@ -90,20 +91,6 @@ impl BitString {
     }
 }
 
-fn shift_bytes(data: &mut Vec<u8>, shift: usize) {
-    let mask = !(0xFF >> shift);
-    let mut frag: u8 = 0x00;
-    if data.len() < 1 {
-        return;
-    }
-    data[0] <<= shift;
-    for i in (1..data.len()).rev() {
-        frag = data[i] & mask;
-        data[i] <<= shift;
-        data[i - 1] |= frag >> (8 - shift);
-    }
-}
-
 impl APerElement for BitString {
     type Result = Self;
     const TAG: u32 = 0xBEEF;
@@ -137,9 +124,37 @@ impl APerElement for BitString {
 
         let delta = num_bytes * 8 - len;
         if delta > 0 && num_bytes > 1 {
-            shift_bytes(&mut content, delta);
+            shift_bytes_left(&mut content, delta);
         }
 
         Ok(BitString::with_bytes_and_len(&content, len))
+    }
+
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        if constraints.size.is_none() {
+            return Err(EncodeError::MissingSizeConstraint);
+        }
+
+        let sz_constr = constraints.size.unwrap();
+        if sz_constr.max().is_none() || sz_constr.max().unwrap() == 0 {
+            return Ok(Encoding::new());
+        }
+
+        let len = sz_constr.max().unwrap() as usize;
+        if len >= 65535 {
+            return Err(EncodeError::NotImplemented);
+        }
+
+        let mut l_padding = 0;
+        let mut r_padding = 0;
+        if self.num_bits < 8 {
+            l_padding = 8 - self.num_bits;
+        } else if self.num_bits <= 16 {
+            l_padding = 16 - self.num_bits;
+        }
+        let mut bytes = self.data.clone();
+        shift_bytes_left(&mut bytes, l_padding); // XXX: this is incorrect for n_bits > 8
+        let enc = Encoding::with_bytes_and_padding(bytes, r_padding + l_padding);
+        Ok(enc)
     }
 }

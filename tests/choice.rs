@@ -1,7 +1,7 @@
 #![feature(associated_consts)]
 extern crate asn1;
 use asn1::{BitString, ExtensionMarker};
-use asn1::aper::{self, APerElement, Constraint, Constraints, UNCONSTRAINED};
+use asn1::aper::{self, APerElement, Constraint, Constraints, Encoding, encode_int, UNCONSTRAINED};
 
 enum Foo {
     foo { a: BitString, },
@@ -61,6 +61,50 @@ impl APerElement for Foo {
             _ => Err(aper::DecodeError::InvalidChoice)
         }
     }
+
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, aper::EncodeError> {
+        let mut enc = (false as ExtensionMarker).to_aper(UNCONSTRAINED).unwrap();
+        match *self {
+            Foo::foo{a: ref a} => {
+                enc.append(&encode_int(0, Some(0), Some(2)).unwrap());
+                enc.append(&a.to_aper(Constraints {
+                    value: None,
+                    size: Some(Constraint::new(None, Some(4))),
+                }).unwrap());
+            },
+            Foo::bar{a: ref a} => {
+                enc.append(&encode_int(1, Some(0), Some(2)).unwrap());
+                enc.append(&a.to_aper(UNCONSTRAINED).unwrap());
+            },
+            Foo::baz{a: ref a, b: ref b} => {
+                enc.append(&encode_int(2, Some(0), Some(2)).unwrap());
+                enc.append(&a.to_aper(UNCONSTRAINED).unwrap());
+                enc.append(&b.to_aper(UNCONSTRAINED).unwrap());
+            },
+        };
+        Ok(enc)
+    }
+}
+
+#[test]
+fn encode_foo() {
+    let x: Foo = Foo::foo{ a: BitString::with_bytes_and_len(&vec![0x0e], 4), };
+    let target: Vec<u8> = vec![0x1c];
+    assert_eq!(target, *x.to_aper(UNCONSTRAINED).unwrap().bytes());
+}
+
+#[test]
+fn encode_bar() {
+    let x: Foo = Foo::bar{ a: vec![0x46, 0x4f, 0x4f], };
+    let target: Vec<u8> = vec![32, 104, 201, 233, 224];
+    assert_eq!(target, *x.to_aper(UNCONSTRAINED).unwrap().bytes());
+}
+
+#[test]
+fn encode_baz() {
+    let x: Foo = Foo::baz{ a: 42, b: 300 };
+    let target: Vec<u8> = vec![69, 64, 37, 128];
+    assert_eq!(target, *x.to_aper(UNCONSTRAINED).unwrap().bytes());
 }
 
 #[test]

@@ -1,5 +1,14 @@
 mod decoder;
+mod encoding;
 pub use self::decoder::{Decoder, DecodeError};
+pub use self::encoding::{Encoding, EncodeError, encode_int, encode_length};
+
+pub const LENGTH_DET_SHORT: u8 = 0b0000_0000;
+pub const LENGTH_DET_LONG: u8 = 0b1000_0000;
+pub const LENGTH_DET_FRAG: u8 = 0b1100_0000;
+
+pub const LENGTH_MASK_SHORT: u8 = 0b0111_1111;
+pub const LENGTH_MASK_LONG: u8 = 0b0011_1111;
 
 /// An interval that desribes the limits on some value.
 /// To indicate something is unbounded, set `min` and `max` to `None`.
@@ -199,4 +208,7 @@ pub trait APerElement {
 
     /// Constructor for the `Result` type given an aligned PER encoding.
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self::Result, decoder::DecodeError>;
+
+    /// For use with `Encoding::append`
+    fn to_aper(&self, constraints: Constraints) -> Result<encoding::Encoding, encoding::EncodeError>;
 }

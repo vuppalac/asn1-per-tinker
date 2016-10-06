@@ -14,8 +14,9 @@
 //! | SEQUENCE OF    | Vec\<T\>              |
 //! | CHOICE         | enum                  |
 //!
-//! *`INTEGER` fields of arbitrary widths (in PER encodings) can be decoded as long as they fit in an `i64`
-//! (see [aper::Decoder::decode_int](aper/struct.Decoder.html#method.decode_int)).
+//! *`INTEGER` fields of arbitrary widths (in PER encodings) can be decoded/encoded as long as they fit in an `i64`
+//! (see [aper::Decoder::decode_int](aper/struct.Decoder.html#method.decode_int) and
+//! [aper::encode_int](aper/fn.encode_int.html)).
 #![feature(associated_consts)]
 extern crate byteorder;
 
@@ -29,6 +30,7 @@ mod sequence;
 mod bool;
 mod extensions;
 mod null;
+mod utils;
 
 pub use bit_string::BitString;
 pub use bool::*;

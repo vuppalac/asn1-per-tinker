@@ -1,6 +1,14 @@
 extern crate asn1;
 use asn1::BitString;
-use asn1::aper::{self, APerElement, Constraint, Constraints};
+use asn1::aper::{self, APerElement, Constraint, Constraints, Encoding, encode_int, UNCONSTRAINED};
+use std::i32;
+
+#[test]
+fn encode_sequence_of_u8() {
+    let v: Vec<u8> = vec![0x46, 0x4f, 0x4f];
+    let target: Vec<u8> = vec![0x03, 0x46, 0x4f, 0x4f];
+    assert_eq!(target, *v.to_aper(UNCONSTRAINED).unwrap().bytes());
+}
 
 #[test]
 fn decode_sequence_of_u8() {
@@ -17,6 +25,13 @@ fn decode_sequence_of_u8() {
 }
 
 #[test]
+fn encode_sequence_of_u16() {
+    let v: Vec<u16> = vec![0xfe46, 0xc04f, 0x884f];
+    let target: Vec<u8> = vec![0x3, 0xfe, 0x46, 0xc0, 0x4f, 0x88, 0x4f];
+    assert_eq!(target, *v.to_aper(UNCONSTRAINED).unwrap().bytes());
+}
+
+#[test]
 fn decode_sequence_of_u16() {
     let data = b"\x03\xfe\x46\xc0\x4f\x88\x4f";
     let target = vec![0xfe46 as u16, 0xc04f as u16, 0x884f as u16];
@@ -29,6 +44,16 @@ fn decode_sequence_of_u16() {
     for i in 0..v.len() {
         assert_eq!(v[i], target[i]);
     }
+}
+
+#[test]
+fn encode_sequence_of_i32() {
+    let v: Vec<i32> = vec![i32::MIN, i32::MIN + 1, i32::MIN + 2];
+    let target: Vec<u8> = vec![0x3,
+                               0x04, 0x00, 0x00, 0x00, 0x00,
+                               0x04, 0x00, 0x00, 0x00, 0x01,
+                               0x04, 0x00, 0x00, 0x00, 0x02];
+    assert_eq!(target, *v.to_aper(UNCONSTRAINED).unwrap().bytes());
 }
 
 #[test]

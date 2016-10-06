@@ -1,4 +1,4 @@
-use aper::{APerElement, Constraint, Constraints, Decoder, DecodeError};
+use aper::{APerElement, Constraint, Constraints, Decoder, DecodeError, Encoding, EncodeError};
 
 impl APerElement for bool {
     type Result = bool;
@@ -15,5 +15,9 @@ impl APerElement for bool {
             return Err(ret.err().unwrap());
         }
         Ok(ret.unwrap() > 0)
+    }
+
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        Ok(Encoding::with_bytes_and_padding(vec![(*self as u8) << 7], 7))
     }
 }

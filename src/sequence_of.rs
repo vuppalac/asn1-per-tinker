@@ -1,4 +1,4 @@
-use aper::{APerElement, Constraint, Constraints, Decoder, DecodeError};
+use aper::{APerElement, Constraint, Constraints, Decoder, DecodeError, Encoding, EncodeError, encode_length};
 
 impl<T: APerElement> APerElement for Vec<T> {
     type Result = Vec<T::Result>;
@@ -54,5 +54,21 @@ impl<T: APerElement> APerElement for Vec<T> {
         }
 
         Ok(content)
+    }
+
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let ret = encode_length(self.len());
+        if ret.is_err() {
+            return Err(ret.err().unwrap());
+        }
+        let mut enc = ret.unwrap();
+        for x in self {
+            enc.append(&x.to_aper(Constraints {
+                    value: None,
+                    size: constraints.value,
+                })
+                .unwrap());
+        }
+        Ok(enc)
     }
 }

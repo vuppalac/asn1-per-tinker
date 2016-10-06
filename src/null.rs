@@ -1,4 +1,4 @@
-use aper::{APerElement, Constraint, Constraints, Decoder, DecodeError};
+use aper::{APerElement, Constraint, Constraints, Decoder, DecodeError, Encoding, EncodeError};
 
 impl APerElement for () {
     type Result = ();
@@ -11,5 +11,9 @@ impl APerElement for () {
     /// Read `()` from an aligned PER encoding.
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self::Result, DecodeError> {
         Ok(())
+    }
+
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        Ok(Encoding::new())
     }
 }
