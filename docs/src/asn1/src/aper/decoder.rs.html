@@ -299,24 +299,10 @@
 <span id="255">255</span>
 <span id="256">256</span>
 <span id="257">257</span>
-<span id="258">258</span>
-<span id="259">259</span>
-<span id="260">260</span>
-<span id="261">261</span>
-<span id="262">262</span>
-<span id="263">263</span>
-<span id="264">264</span>
 </pre><pre class='rust '>
 <span class='kw'>use</span> <span class='ident'>byteorder</span>::{<span class='ident'>ByteOrder</span>, <span class='ident'>BigEndian</span>, <span class='ident'>ReadBytesExt</span>, <span class='ident'>WriteBytesExt</span>};
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::{<span class='self'>self</span>, <span class='ident'>BufRead</span>, <span class='ident'>Read</span>, <span class='ident'>Write</span>, <span class='ident'>Cursor</span>};
 <span class='kw'>use</span> <span class='kw'>super</span>::<span class='op'>*</span>;
-
-<span class='kw'>const</span> <span class='ident'>LENGTH_DET_SHORT</span>: <span class='ident'>u8</span> <span class='op'>=</span> <span class='number'>0b0000_0000</span>;
-<span class='kw'>const</span> <span class='ident'>LENGTH_DET_LONG</span>: <span class='ident'>u8</span> <span class='op'>=</span> <span class='number'>0b1000_0000</span>;
-<span class='kw'>const</span> <span class='ident'>LENGTH_DET_FRAG</span>: <span class='ident'>u8</span> <span class='op'>=</span> <span class='number'>0b1100_0000</span>;
-
-<span class='kw'>const</span> <span class='ident'>LENGTH_MASK_SHORT</span>: <span class='ident'>u8</span> <span class='op'>=</span> <span class='number'>0b0111_1111</span>;
-<span class='kw'>const</span> <span class='ident'>LENGTH_MASK_LONG</span>: <span class='ident'>u8</span> <span class='op'>=</span> <span class='number'>0b0011_1111</span>;
 
 <span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Debug</span>, <span class='ident'>PartialEq</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>DecodeError</span> {

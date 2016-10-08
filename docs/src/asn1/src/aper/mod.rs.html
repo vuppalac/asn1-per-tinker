@@ -244,9 +244,30 @@
 <span id="200">200</span>
 <span id="201">201</span>
 <span id="202">202</span>
+<span id="203">203</span>
+<span id="204">204</span>
+<span id="205">205</span>
+<span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
+<span id="214">214</span>
 </pre><pre class='rust '>
 <span class='kw'>mod</span> <span class='ident'>decoder</span>;
+<span class='kw'>mod</span> <span class='ident'>encoding</span>;
 <span class='kw'>pub</span> <span class='kw'>use</span> <span class='self'>self</span>::<span class='ident'>decoder</span>::{<span class='ident'>Decoder</span>, <span class='ident'>DecodeError</span>};
+<span class='kw'>pub</span> <span class='kw'>use</span> <span class='self'>self</span>::<span class='ident'>encoding</span>::{<span class='ident'>Encoding</span>, <span class='ident'>EncodeError</span>, <span class='ident'>encode_int</span>, <span class='ident'>encode_length</span>};
+
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>LENGTH_DET_SHORT</span>: <span class='ident'>u8</span> <span class='op'>=</span> <span class='number'>0b0000_0000</span>;
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>LENGTH_DET_LONG</span>: <span class='ident'>u8</span> <span class='op'>=</span> <span class='number'>0b1000_0000</span>;
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>LENGTH_DET_FRAG</span>: <span class='ident'>u8</span> <span class='op'>=</span> <span class='number'>0b1100_0000</span>;
+
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>LENGTH_MASK_SHORT</span>: <span class='ident'>u8</span> <span class='op'>=</span> <span class='number'>0b0111_1111</span>;
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>LENGTH_MASK_LONG</span>: <span class='ident'>u8</span> <span class='op'>=</span> <span class='number'>0b0011_1111</span>;
 
 <span class='doccomment'>/// An interval that desribes the limits on some value.</span>
 <span class='doccomment'>/// To indicate something is unbounded, set `min` and `max` to `None`.</span>
@@ -446,6 +467,9 @@
 
     <span class='doccomment'>/// Constructor for the `Result` type given an aligned PER encoding.</span>
     <span class='kw'>fn</span> <span class='ident'>from_aper</span>(<span class='ident'>decoder</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Decoder</span>, <span class='ident'>constraints</span>: <span class='ident'>Constraints</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='self'>Self</span>::<span class='prelude-ty'>Result</span>, <span class='ident'>decoder</span>::<span class='ident'>DecodeError</span><span class='op'>&gt;</span>;
+
+    <span class='doccomment'>/// For use with `Encoding::append`</span>
+    <span class='kw'>fn</span> <span class='ident'>to_aper</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>constraints</span>: <span class='ident'>Constraints</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>encoding</span>::<span class='ident'>Encoding</span>, <span class='ident'>encoding</span>::<span class='ident'>EncodeError</span><span class='op'>&gt;</span>;
 }
 </pre>
 </section>

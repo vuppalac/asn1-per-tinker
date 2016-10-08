@@ -187,9 +187,25 @@
 <span id="143">143</span>
 <span id="144">144</span>
 <span id="145">145</span>
+<span id="146">146</span>
+<span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
+<span id="150">150</span>
+<span id="151">151</span>
+<span id="152">152</span>
+<span id="153">153</span>
+<span id="154">154</span>
+<span id="155">155</span>
+<span id="156">156</span>
+<span id="157">157</span>
+<span id="158">158</span>
+<span id="159">159</span>
+<span id="160">160</span>
 </pre><pre class='rust '>
-<span class='kw'>use</span> <span class='ident'>aper</span>::{<span class='ident'>APerElement</span>, <span class='ident'>Constraint</span>, <span class='ident'>Constraints</span>, <span class='ident'>Decoder</span>, <span class='ident'>DecodeError</span>};
+<span class='kw'>use</span> <span class='ident'>aper</span>::{<span class='ident'>APerElement</span>, <span class='ident'>Constraint</span>, <span class='ident'>Constraints</span>, <span class='ident'>Decoder</span>, <span class='ident'>DecodeError</span>, <span class='ident'>Encoding</span>, <span class='ident'>EncodeError</span>};
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>cmp</span>;
+<span class='kw'>use</span> <span class='ident'>utils</span>::<span class='ident'>shift_bytes_left</span>;
 
 <span class='doccomment'>/// A bit string.</span>
 <span class='doccomment'>///</span>
@@ -280,20 +296,6 @@
     }
 }
 
-<span class='kw'>fn</span> <span class='ident'>shift_bytes</span>(<span class='ident'>data</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span>, <span class='ident'>shift</span>: <span class='ident'>usize</span>) {
-    <span class='kw'>let</span> <span class='ident'>mask</span> <span class='op'>=</span> <span class='op'>!</span>(<span class='number'>0xFF</span> <span class='op'>&gt;&gt;</span> <span class='ident'>shift</span>);
-    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>frag</span>: <span class='ident'>u8</span> <span class='op'>=</span> <span class='number'>0x00</span>;
-    <span class='kw'>if</span> <span class='ident'>data</span>.<span class='ident'>len</span>() <span class='op'>&lt;</span> <span class='number'>1</span> {
-        <span class='kw'>return</span>;
-    }
-    <span class='ident'>data</span>[<span class='number'>0</span>] <span class='op'>&lt;&lt;=</span> <span class='ident'>shift</span>;
-    <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> (<span class='number'>1</span>..<span class='ident'>data</span>.<span class='ident'>len</span>()).<span class='ident'>rev</span>() {
-        <span class='ident'>frag</span> <span class='op'>=</span> <span class='ident'>data</span>[<span class='ident'>i</span>] <span class='kw-2'>&amp;</span> <span class='ident'>mask</span>;
-        <span class='ident'>data</span>[<span class='ident'>i</span>] <span class='op'>&lt;&lt;=</span> <span class='ident'>shift</span>;
-        <span class='ident'>data</span>[<span class='ident'>i</span> <span class='op'>-</span> <span class='number'>1</span>] <span class='op'>|=</span> <span class='ident'>frag</span> <span class='op'>&gt;&gt;</span> (<span class='number'>8</span> <span class='op'>-</span> <span class='ident'>shift</span>);
-    }
-}
-
 <span class='kw'>impl</span> <span class='ident'>APerElement</span> <span class='kw'>for</span> <span class='ident'>BitString</span> {
     <span class='kw'>type</span> <span class='prelude-ty'>Result</span> <span class='op'>=</span> <span class='self'>Self</span>;
     <span class='kw'>const</span> <span class='ident'>TAG</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xBEEF</span>;
@@ -327,10 +329,38 @@
 
         <span class='kw'>let</span> <span class='ident'>delta</span> <span class='op'>=</span> <span class='ident'>num_bytes</span> <span class='op'>*</span> <span class='number'>8</span> <span class='op'>-</span> <span class='ident'>len</span>;
         <span class='kw'>if</span> <span class='ident'>delta</span> <span class='op'>&gt;</span> <span class='number'>0</span> <span class='op'>&amp;&amp;</span> <span class='ident'>num_bytes</span> <span class='op'>&gt;</span> <span class='number'>1</span> {
-            <span class='ident'>shift_bytes</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>content</span>, <span class='ident'>delta</span>);
+            <span class='ident'>shift_bytes_left</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>content</span>, <span class='ident'>delta</span>);
         }
 
         <span class='prelude-val'>Ok</span>(<span class='ident'>BitString</span>::<span class='ident'>with_bytes_and_len</span>(<span class='kw-2'>&amp;</span><span class='ident'>content</span>, <span class='ident'>len</span>))
+    }
+
+    <span class='kw'>fn</span> <span class='ident'>to_aper</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>constraints</span>: <span class='ident'>Constraints</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Encoding</span>, <span class='ident'>EncodeError</span><span class='op'>&gt;</span> {
+        <span class='kw'>if</span> <span class='ident'>constraints</span>.<span class='ident'>size</span>.<span class='ident'>is_none</span>() {
+            <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>EncodeError</span>::<span class='ident'>MissingSizeConstraint</span>);
+        }
+
+        <span class='kw'>let</span> <span class='ident'>sz_constr</span> <span class='op'>=</span> <span class='ident'>constraints</span>.<span class='ident'>size</span>.<span class='ident'>unwrap</span>();
+        <span class='kw'>if</span> <span class='ident'>sz_constr</span>.<span class='ident'>max</span>().<span class='ident'>is_none</span>() <span class='op'>||</span> <span class='ident'>sz_constr</span>.<span class='ident'>max</span>().<span class='ident'>unwrap</span>() <span class='op'>==</span> <span class='number'>0</span> {
+            <span class='kw'>return</span> <span class='prelude-val'>Ok</span>(<span class='ident'>Encoding</span>::<span class='ident'>new</span>());
+        }
+
+        <span class='kw'>let</span> <span class='ident'>len</span> <span class='op'>=</span> <span class='ident'>sz_constr</span>.<span class='ident'>max</span>().<span class='ident'>unwrap</span>() <span class='kw'>as</span> <span class='ident'>usize</span>;
+        <span class='kw'>if</span> <span class='ident'>len</span> <span class='op'>&gt;=</span> <span class='number'>65535</span> {
+            <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>EncodeError</span>::<span class='ident'>NotImplemented</span>);
+        }
+
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>l_padding</span> <span class='op'>=</span> <span class='number'>0</span>;
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>r_padding</span> <span class='op'>=</span> <span class='number'>0</span>;
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>num_bits</span> <span class='op'>&lt;</span> <span class='number'>8</span> {
+            <span class='ident'>l_padding</span> <span class='op'>=</span> <span class='number'>8</span> <span class='op'>-</span> <span class='self'>self</span>.<span class='ident'>num_bits</span>;
+        } <span class='kw'>else</span> <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>num_bits</span> <span class='op'>&lt;=</span> <span class='number'>16</span> {
+            <span class='ident'>l_padding</span> <span class='op'>=</span> <span class='number'>16</span> <span class='op'>-</span> <span class='self'>self</span>.<span class='ident'>num_bits</span>;
+        }
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>bytes</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>data</span>.<span class='ident'>clone</span>();
+        <span class='ident'>shift_bytes_left</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>bytes</span>, <span class='ident'>l_padding</span>); <span class='comment'>// XXX: this is incorrect for n_bits &gt; 8</span>
+        <span class='kw'>let</span> <span class='ident'>enc</span> <span class='op'>=</span> <span class='ident'>Encoding</span>::<span class='ident'>with_bytes_and_padding</span>(<span class='ident'>bytes</span>, <span class='ident'>r_padding</span> <span class='op'>+</span> <span class='ident'>l_padding</span>);
+        <span class='prelude-val'>Ok</span>(<span class='ident'>enc</span>)
     }
 }
 </pre>

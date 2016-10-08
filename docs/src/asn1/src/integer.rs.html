@@ -72,8 +72,16 @@
 <span id="28">28</span>
 <span id="29">29</span>
 <span id="30">30</span>
+<span id="31">31</span>
+<span id="32">32</span>
+<span id="33">33</span>
+<span id="34">34</span>
+<span id="35">35</span>
+<span id="36">36</span>
+<span id="37">37</span>
+<span id="38">38</span>
 </pre><pre class='rust '>
-<span class='kw'>use</span> <span class='ident'>aper</span>::{<span class='ident'>APerElement</span>, <span class='ident'>Constraint</span>, <span class='ident'>Constraints</span>, <span class='ident'>Decoder</span>, <span class='ident'>DecodeError</span>};
+<span class='kw'>use</span> <span class='ident'>aper</span>::{<span class='ident'>APerElement</span>, <span class='ident'>Constraint</span>, <span class='ident'>Constraints</span>, <span class='ident'>Decoder</span>, <span class='ident'>DecodeError</span>, <span class='ident'>Encoding</span>, <span class='ident'>EncodeError</span>, <span class='ident'>encode_int</span>};
 <span class='kw'>use</span> <span class='ident'>std</span>::{<span class='ident'>i8</span>, <span class='ident'>i16</span>, <span class='ident'>i32</span>, <span class='ident'>u8</span>, <span class='ident'>u16</span>, <span class='ident'>u32</span>};
 
 <span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>int_impl</span> {
@@ -92,6 +100,14 @@
                     <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>ret</span>.<span class='ident'>err</span>().<span class='ident'>unwrap</span>());
                 }
                 <span class='prelude-val'>Ok</span>(<span class='ident'>ret</span>.<span class='ident'>unwrap</span>() <span class='kw'>as</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span>)
+            }
+
+            <span class='kw'>fn</span> <span class='ident'>to_aper</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>constraints</span>: <span class='ident'>Constraints</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Encoding</span>, <span class='ident'>EncodeError</span><span class='op'>&gt;</span> {
+                <span class='kw'>let</span> <span class='ident'>ret</span> <span class='op'>=</span> <span class='ident'>encode_int</span>(<span class='op'>*</span><span class='self'>self</span> <span class='kw'>as</span> <span class='ident'>i64</span>, <span class='prelude-val'>Some</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span>::<span class='ident'>MIN</span> <span class='kw'>as</span> <span class='ident'>i64</span>), <span class='prelude-val'>Some</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span>::<span class='ident'>MAX</span> <span class='kw'>as</span> <span class='ident'>i64</span>));
+                <span class='kw'>if</span> <span class='ident'>ret</span>.<span class='ident'>is_err</span>() {
+                    <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>ret</span>.<span class='ident'>err</span>().<span class='ident'>unwrap</span>());
+                }
+                <span class='prelude-val'>Ok</span>(<span class='ident'>ret</span>.<span class='ident'>unwrap</span>())
             }
         }
     };

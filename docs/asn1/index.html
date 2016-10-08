@@ -47,7 +47,7 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-0' class='srclink' href='../src/asn1/src/lib.rs.html#1-39' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-0' class='srclink' href='../src/asn1/src/lib.rs.html#1-41' title='goto source code'>[src]</a></span></h1>
 <div class='docblock'><p>This library provides tools for decoding/encoding ASN.1 messages to/from their corresponding Rust types.</p>
 
 <h1 id='asn1-type-correspondence' class='section-header'><a href='#asn1-type-correspondence'>ASN.1 Type Correspondence</a></h1>
@@ -93,8 +93,9 @@
 </tbody>
 </table>
 
-<p>*<code>INTEGER</code> fields of arbitrary widths (in PER encodings) can be decoded as long as they fit in an <code>i64</code>
-(see <a href="aper/struct.Decoder.html#method.decode_int">aper::Decoder::decode_int</a>).</p>
+<p>*<code>INTEGER</code> fields of arbitrary widths (in PER encodings) can be decoded/encoded as long as they fit in an <code>i64</code>
+(see <a href="aper/struct.Decoder.html#method.decode_int">aper::Decoder::decode_int</a> and
+<a href="aper/fn.encode_int.html">aper::encode_int</a>).</p>
 </div><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
 <table>
                        <tr class=' module-item'>

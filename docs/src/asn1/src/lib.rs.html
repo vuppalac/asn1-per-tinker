@@ -81,6 +81,8 @@
 <span id="37">37</span>
 <span id="38">38</span>
 <span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
 </pre><pre class='rust '>
 <span class='doccomment'>//! This library provides tools for decoding/encoding ASN.1 messages to/from their corresponding Rust types.</span>
 <span class='doccomment'>//!</span>
@@ -98,8 +100,9 @@
 <span class='doccomment'>//! | SEQUENCE OF    | Vec\&lt;T\&gt;              |</span>
 <span class='doccomment'>//! | CHOICE         | enum                  |</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//! *`INTEGER` fields of arbitrary widths (in PER encodings) can be decoded as long as they fit in an `i64`</span>
-<span class='doccomment'>//! (see [aper::Decoder::decode_int](aper/struct.Decoder.html#method.decode_int)).</span>
+<span class='doccomment'>//! *`INTEGER` fields of arbitrary widths (in PER encodings) can be decoded/encoded as long as they fit in an `i64`</span>
+<span class='doccomment'>//! (see [aper::Decoder::decode_int](aper/struct.Decoder.html#method.decode_int) and</span>
+<span class='doccomment'>//! [aper::encode_int](aper/fn.encode_int.html)).</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>feature</span>(<span class='ident'>associated_consts</span>)]</span>
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>byteorder</span>;
 
@@ -113,6 +116,7 @@
 <span class='kw'>mod</span> <span class='ident'>bool</span>;
 <span class='kw'>mod</span> <span class='ident'>extensions</span>;
 <span class='kw'>mod</span> <span class='ident'>null</span>;
+<span class='kw'>mod</span> <span class='ident'>utils</span>;
 
 <span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>bit_string</span>::<span class='ident'>BitString</span>;
 <span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>bool</span>::<span class='op'>*</span>;

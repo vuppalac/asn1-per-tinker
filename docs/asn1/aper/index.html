@@ -47,7 +47,7 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-5' class='srclink' href='../../src/asn1/src/aper/mod.rs.html#1-202' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-5' class='srclink' href='../../src/asn1/src/aper/mod.rs.html#1-214' title='goto source code'>[src]</a></span></h1>
 <div class='docblock'><p>Tools for encoding and decoding ASN.1 messages of the Aligned PER flavor.</p>
 </div><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
 <table>
@@ -73,6 +73,13 @@ A value is considered unconstrained if <code>value</code> and <code>size</code> 
                            <td class='docblock-short'>
                                 <p>A bit-wise cursor used to decode aligned PER messagses.</p>
                            </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.Encoding.html'
+                                  title='asn1::aper::Encoding'>Encoding</a></td>
+                           <td class='docblock-short'>
+                                <p>A wrapper for an aligned PER encoding.</p>
+                           </td>
                        </tr></table><h2 id='enums' class='section-header'><a href="#enums">Enums</a></h2>
 <table>
                        <tr class=' module-item'>
@@ -81,8 +88,50 @@ A value is considered unconstrained if <code>value</code> and <code>size</code> 
                            <td class='docblock-short'>
                                 
                            </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='enum' href='enum.EncodeError.html'
+                                  title='asn1::aper::EncodeError'>EncodeError</a></td>
+                           <td class='docblock-short'>
+                                
+                           </td>
                        </tr></table><h2 id='constants' class='section-header'><a href="#constants">Constants</a></h2>
 <table>
+                       <tr class=' module-item'>
+                           <td><a class='constant' href='constant.LENGTH_DET_FRAG.html'
+                                  title='asn1::aper::LENGTH_DET_FRAG'>LENGTH_DET_FRAG</a></td>
+                           <td class='docblock-short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='constant' href='constant.LENGTH_DET_LONG.html'
+                                  title='asn1::aper::LENGTH_DET_LONG'>LENGTH_DET_LONG</a></td>
+                           <td class='docblock-short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='constant' href='constant.LENGTH_DET_SHORT.html'
+                                  title='asn1::aper::LENGTH_DET_SHORT'>LENGTH_DET_SHORT</a></td>
+                           <td class='docblock-short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='constant' href='constant.LENGTH_MASK_LONG.html'
+                                  title='asn1::aper::LENGTH_MASK_LONG'>LENGTH_MASK_LONG</a></td>
+                           <td class='docblock-short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='constant' href='constant.LENGTH_MASK_SHORT.html'
+                                  title='asn1::aper::LENGTH_MASK_SHORT'>LENGTH_MASK_SHORT</a></td>
+                           <td class='docblock-short'>
+                                
+                           </td>
+                       </tr>
                        <tr class=' module-item'>
                            <td><a class='constant' href='constant.UNCONSTRAINED.html'
                                   title='asn1::aper::UNCONSTRAINED'>UNCONSTRAINED</a></td>
@@ -96,6 +145,21 @@ A value is considered unconstrained if <code>value</code> and <code>size</code> 
                                   title='asn1::aper::APerElement'>APerElement</a></td>
                            <td class='docblock-short'>
                                 <p>Trait for Aligned PER encoding/decoding.</p>
+                           </td>
+                       </tr></table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.encode_int.html'
+                                  title='asn1::aper::encode_int'>encode_int</a></td>
+                           <td class='docblock-short'>
+                                <p>Encode an aligned PER integer between <code>min</code> and <code>max</code>.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.encode_length.html'
+                                  title='asn1::aper::encode_length'>encode_length</a></td>
+                           <td class='docblock-short'>
+                                <p>Encode an aligned PER length determinant.</p>
                            </td>
                        </tr></table></section>
     <section id='search' class="content hidden"></section>
