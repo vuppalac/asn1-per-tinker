@@ -47,7 +47,7 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-137' class='srclink' href='../../src/asn1/src/aper/mod.rs.html#199-214' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-137' class='srclink' href='../../src/asn1/src/aper/mod.rs.html#222-237' title='goto source code'>[src]</a></span></h1>
 <pre class='rust trait'>pub trait APerElement {
     type <a href='#associatedtype.Result' class='type'>Result</a>;
 
@@ -194,6 +194,29 @@
             }
             _ <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='ident'>aper</span>::<span class='ident'>DecodeError</span>::<span class='ident'>InvalidChoice</span>)
         }
+    }
+
+    <span class='kw'>fn</span> <span class='ident'>to_aper</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>constraints</span>: <span class='ident'>Constraints</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Encoding</span>, <span class='ident'>aper</span>::<span class='ident'>EncodeError</span><span class='op'>&gt;</span> {
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>enc</span> <span class='op'>=</span> (<span class='bool-val'>false</span> <span class='kw'>as</span> <span class='ident'>ExtensionMarker</span>).<span class='ident'>to_aper</span>(<span class='ident'>UNCONSTRAINED</span>).<span class='ident'>unwrap</span>();
+        <span class='kw'>match</span> <span class='op'>*</span><span class='self'>self</span> {
+            <span class='ident'>Foo</span>::<span class='ident'>foo</span>{<span class='ident'>a</span>: <span class='kw-2'>ref</span> <span class='ident'>a</span>} <span class='op'>=&gt;</span> {
+                <span class='ident'>enc</span>.<span class='ident'>append</span>(<span class='kw-2'>&amp;</span><span class='ident'>encode_int</span>(<span class='number'>0</span>, <span class='prelude-val'>Some</span>(<span class='number'>0</span>), <span class='prelude-val'>Some</span>(<span class='number'>2</span>)).<span class='ident'>unwrap</span>());
+                <span class='ident'>enc</span>.<span class='ident'>append</span>(<span class='kw-2'>&amp;</span><span class='ident'>a</span>.<span class='ident'>to_aper</span>(<span class='ident'>Constraints</span> {
+                    <span class='ident'>value</span>: <span class='prelude-val'>None</span>,
+                    <span class='ident'>size</span>: <span class='prelude-val'>Some</span>(<span class='ident'>Constraint</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='prelude-val'>Some</span>(<span class='number'>4</span>))),
+                }).<span class='ident'>unwrap</span>());
+            },
+            <span class='ident'>Foo</span>::<span class='ident'>bar</span>{<span class='ident'>a</span>: <span class='kw-2'>ref</span> <span class='ident'>a</span>} <span class='op'>=&gt;</span> {
+                <span class='ident'>enc</span>.<span class='ident'>append</span>(<span class='kw-2'>&amp;</span><span class='ident'>encode_int</span>(<span class='number'>1</span>, <span class='prelude-val'>Some</span>(<span class='number'>0</span>), <span class='prelude-val'>Some</span>(<span class='number'>2</span>)).<span class='ident'>unwrap</span>());
+                <span class='ident'>enc</span>.<span class='ident'>append</span>(<span class='kw-2'>&amp;</span><span class='ident'>a</span>.<span class='ident'>to_aper</span>(<span class='ident'>UNCONSTRAINED</span>).<span class='ident'>unwrap</span>());
+            },
+            <span class='ident'>Foo</span>::<span class='ident'>baz</span>{<span class='ident'>a</span>: <span class='kw-2'>ref</span> <span class='ident'>a</span>, <span class='ident'>b</span>: <span class='kw-2'>ref</span> <span class='ident'>b</span>} <span class='op'>=&gt;</span> {
+                <span class='ident'>enc</span>.<span class='ident'>append</span>(<span class='kw-2'>&amp;</span><span class='ident'>encode_int</span>(<span class='number'>2</span>, <span class='prelude-val'>Some</span>(<span class='number'>0</span>), <span class='prelude-val'>Some</span>(<span class='number'>2</span>)).<span class='ident'>unwrap</span>());
+                <span class='ident'>enc</span>.<span class='ident'>append</span>(<span class='kw-2'>&amp;</span><span class='ident'>a</span>.<span class='ident'>to_aper</span>(<span class='ident'>UNCONSTRAINED</span>).<span class='ident'>unwrap</span>());
+                <span class='ident'>enc</span>.<span class='ident'>append</span>(<span class='kw-2'>&amp;</span><span class='ident'>b</span>.<span class='ident'>to_aper</span>(<span class='ident'>UNCONSTRAINED</span>).<span class='ident'>unwrap</span>());
+            },
+        };
+        <span class='prelude-val'>Ok</span>(<span class='ident'>enc</span>)
     }
 }<a class='test-arrow' target='_blank' href=''>Run</a></pre>
 </div>

@@ -256,6 +256,29 @@
 <span id="212">212</span>
 <span id="213">213</span>
 <span id="214">214</span>
+<span id="215">215</span>
+<span id="216">216</span>
+<span id="217">217</span>
+<span id="218">218</span>
+<span id="219">219</span>
+<span id="220">220</span>
+<span id="221">221</span>
+<span id="222">222</span>
+<span id="223">223</span>
+<span id="224">224</span>
+<span id="225">225</span>
+<span id="226">226</span>
+<span id="227">227</span>
+<span id="228">228</span>
+<span id="229">229</span>
+<span id="230">230</span>
+<span id="231">231</span>
+<span id="232">232</span>
+<span id="233">233</span>
+<span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
 </pre><pre class='rust '>
 <span class='kw'>mod</span> <span class='ident'>decoder</span>;
 <span class='kw'>mod</span> <span class='ident'>encoding</span>;
@@ -452,6 +475,29 @@
 <span class='doccomment'>///             }</span>
 <span class='doccomment'>///             _ =&gt; Err(aper::DecodeError::InvalidChoice)</span>
 <span class='doccomment'>///         }</span>
+<span class='doccomment'>///     }</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>///     fn to_aper(&amp;self, constraints: Constraints) -&gt; Result&lt;Encoding, aper::EncodeError&gt; {</span>
+<span class='doccomment'>///         let mut enc = (false as ExtensionMarker).to_aper(UNCONSTRAINED).unwrap();</span>
+<span class='doccomment'>///         match *self {</span>
+<span class='doccomment'>///             Foo::foo{a: ref a} =&gt; {</span>
+<span class='doccomment'>///                 enc.append(&amp;encode_int(0, Some(0), Some(2)).unwrap());</span>
+<span class='doccomment'>///                 enc.append(&amp;a.to_aper(Constraints {</span>
+<span class='doccomment'>///                     value: None,</span>
+<span class='doccomment'>///                     size: Some(Constraint::new(None, Some(4))),</span>
+<span class='doccomment'>///                 }).unwrap());</span>
+<span class='doccomment'>///             },</span>
+<span class='doccomment'>///             Foo::bar{a: ref a} =&gt; {</span>
+<span class='doccomment'>///                 enc.append(&amp;encode_int(1, Some(0), Some(2)).unwrap());</span>
+<span class='doccomment'>///                 enc.append(&amp;a.to_aper(UNCONSTRAINED).unwrap());</span>
+<span class='doccomment'>///             },</span>
+<span class='doccomment'>///             Foo::baz{a: ref a, b: ref b} =&gt; {</span>
+<span class='doccomment'>///                 enc.append(&amp;encode_int(2, Some(0), Some(2)).unwrap());</span>
+<span class='doccomment'>///                 enc.append(&amp;a.to_aper(UNCONSTRAINED).unwrap());</span>
+<span class='doccomment'>///                 enc.append(&amp;b.to_aper(UNCONSTRAINED).unwrap());</span>
+<span class='doccomment'>///             },</span>
+<span class='doccomment'>///         };</span>
+<span class='doccomment'>///         Ok(enc)</span>
 <span class='doccomment'>///     }</span>
 <span class='doccomment'>/// }</span>
 <span class='doccomment'>/// ```</span>

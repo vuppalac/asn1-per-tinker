@@ -194,6 +194,29 @@ pub const UNCONSTRAINED: Constraints = Constraints {
 ///             _ => Err(aper::DecodeError::InvalidChoice)
 ///         }
 ///     }
+///
+///     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, aper::EncodeError> {
+///         let mut enc = (false as ExtensionMarker).to_aper(UNCONSTRAINED).unwrap();
+///         match *self {
+///             Foo::foo{a: ref a} => {
+///                 enc.append(&encode_int(0, Some(0), Some(2)).unwrap());
+///                 enc.append(&a.to_aper(Constraints {
+///                     value: None,
+///                     size: Some(Constraint::new(None, Some(4))),
+///                 }).unwrap());
+///             },
+///             Foo::bar{a: ref a} => {
+///                 enc.append(&encode_int(1, Some(0), Some(2)).unwrap());
+///                 enc.append(&a.to_aper(UNCONSTRAINED).unwrap());
+///             },
+///             Foo::baz{a: ref a, b: ref b} => {
+///                 enc.append(&encode_int(2, Some(0), Some(2)).unwrap());
+///                 enc.append(&a.to_aper(UNCONSTRAINED).unwrap());
+///                 enc.append(&b.to_aper(UNCONSTRAINED).unwrap());
+///             },
+///         };
+///         Ok(enc)
+///     }
 /// }
 /// ```
 pub trait APerElement {
