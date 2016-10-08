@@ -47,14 +47,11 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-137' class='srclink' href='../../src/asn1/src/aper/mod.rs.html#222-237' title='goto source code'>[src]</a></span></h1>
-<pre class='rust trait'>pub trait APerElement {
-    type <a href='#associatedtype.Result' class='type'>Result</a>;
-
-    const <a href='#associatedconstant.TAG' class='constant'>TAG</a>: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u32.html'>u32</a>;
+               </span><a id='src-137' class='srclink' href='../../src/asn1/src/aper/mod.rs.html#220-229' title='goto source code'>[src]</a></span></h1>
+<pre class='rust trait'>pub trait APerElement: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a> {
     const <a href='#associatedconstant.CONSTRAINTS' class='constant'>CONSTRAINTS</a>: <a class='struct' href='../../asn1/aper/struct.Constraints.html' title='asn1::aper::Constraints'>Constraints</a>;
 
-    fn <a href='#tymethod.from_aper' class='fnname'>from_aper</a>(decoder: &amp;mut <a class='struct' href='../../asn1/aper/struct.Decoder.html' title='asn1::aper::Decoder'>Decoder</a>, constraints: <a class='struct' href='../../asn1/aper/struct.Constraints.html' title='asn1::aper::Constraints'>Constraints</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;Self::Result,&nbsp;<a class='enum' href='../../asn1/aper/enum.DecodeError.html' title='asn1::aper::DecodeError'>DecodeError</a>&gt;;
+    fn <a href='#tymethod.from_aper' class='fnname'>from_aper</a>(decoder: &amp;mut <a class='struct' href='../../asn1/aper/struct.Decoder.html' title='asn1::aper::Decoder'>Decoder</a>, constraints: <a class='struct' href='../../asn1/aper/struct.Constraints.html' title='asn1::aper::Constraints'>Constraints</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;Self,&nbsp;<a class='enum' href='../../asn1/aper/enum.DecodeError.html' title='asn1::aper::DecodeError'>DecodeError</a>&gt;;
     fn <a href='#tymethod.to_aper' class='fnname'>to_aper</a>(&amp;self, constraints: <a class='struct' href='../../asn1/aper/struct.Constraints.html' title='asn1::aper::Constraints'>Constraints</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='../../asn1/aper/struct.Encoding.html' title='asn1::aper::Encoding'>Encoding</a>,&nbsp;<a class='enum' href='../../asn1/aper/enum.EncodeError.html' title='asn1::aper::EncodeError'>EncodeError</a>&gt;;
 }</pre><div class='docblock'><p>Trait for Aligned PER encoding/decoding.</p>
 
@@ -144,10 +141,8 @@
 }
 
 <span class='kw'>impl</span> <span class='ident'>APerElement</span> <span class='kw'>for</span> <span class='ident'>MyMsg</span> {
-    <span class='kw'>type</span> <span class='prelude-ty'>Result</span> <span class='op'>=</span> <span class='self'>Self</span>;
-    <span class='kw'>const</span> <span class='ident'>TAG</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xBEEF</span>;
     <span class='kw'>const</span> <span class='ident'>CONSTRAINTS</span>: <span class='ident'>Constraints</span> <span class='op'>=</span> <span class='ident'>UNCONSTRAINED</span>;
-    <span class='kw'>fn</span> <span class='ident'>from_aper</span>(<span class='ident'>decoder</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>aper</span>::<span class='ident'>Decoder</span>, <span class='ident'>constraints</span>: <span class='ident'>Constraints</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='self'>Self</span>::<span class='prelude-ty'>Result</span>, <span class='ident'>aper</span>::<span class='ident'>DecodeError</span><span class='op'>&gt;</span> {
+    <span class='kw'>fn</span> <span class='ident'>from_aper</span>(<span class='ident'>decoder</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>aper</span>::<span class='ident'>Decoder</span>, <span class='ident'>constraints</span>: <span class='ident'>Constraints</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='self'>Self</span>, <span class='ident'>aper</span>::<span class='ident'>DecodeError</span><span class='op'>&gt;</span> {
         <span class='kw'>let</span> <span class='ident'>is_ext</span> <span class='op'>=</span> <span class='ident'>ExtensionMarker</span>::<span class='ident'>from_aper</span>(<span class='ident'>decoder</span>, <span class='ident'>UNCONSTRAINED</span>);
         <span class='kw'>if</span> <span class='ident'>is_ext</span>.<span class='ident'>is_err</span>() {
             <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>is_ext</span>.<span class='ident'>err</span>().<span class='ident'>unwrap</span>());
@@ -220,18 +215,13 @@
     }
 }<a class='test-arrow' target='_blank' href=''>Run</a></pre>
 </div>
-            <h2 id='associated-types'>Associated Types</h2>
-            <div class='methods'>
-        <h3 id='associatedtype.Result' class='method stab '><span id='Result.t' class='invisible'><code>type <a href='#associatedtype.Result' class='type'>Result</a></code></span></h3><div class='docblock'><p>The type to be returned by <code>from_aper</code>, usually <code>Self</code></p>
-</div></div>
             <h2 id='associated-const'>Associated Constants</h2>
             <div class='methods'>
-        <h3 id='associatedconstant.TAG' class='method stab '><span id='TAG.v' class='invisible'><code>const <a href='#associatedconstant.TAG' class='constant'>TAG</a>: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u32.html'>u32</a></code></span></h3><div class='docblock'><p>A tag for determining canonical-PER ordering. Not currently used.</p>
-</div><h3 id='associatedconstant.CONSTRAINTS' class='method stab '><span id='CONSTRAINTS.v' class='invisible'><code>const <a href='#associatedconstant.CONSTRAINTS' class='constant'>CONSTRAINTS</a>: <a class='struct' href='../../asn1/aper/struct.Constraints.html' title='asn1::aper::Constraints'>Constraints</a></code></span></h3><div class='docblock'><p>PER-visible Constraints</p>
+        <h3 id='associatedconstant.CONSTRAINTS' class='method stab '><span id='CONSTRAINTS.v' class='invisible'><code>const <a href='#associatedconstant.CONSTRAINTS' class='constant'>CONSTRAINTS</a>: <a class='struct' href='../../asn1/aper/struct.Constraints.html' title='asn1::aper::Constraints'>Constraints</a></code></span></h3><div class='docblock'><p>PER-visible Constraints</p>
 </div></div>
             <h2 id='required-methods'>Required Methods</h2>
             <div class='methods'>
-        <h3 id='tymethod.from_aper' class='method stab '><span id='from_aper.v' class='invisible'><code>fn <a href='#tymethod.from_aper' class='fnname'>from_aper</a>(decoder: &amp;mut <a class='struct' href='../../asn1/aper/struct.Decoder.html' title='asn1::aper::Decoder'>Decoder</a>, constraints: <a class='struct' href='../../asn1/aper/struct.Constraints.html' title='asn1::aper::Constraints'>Constraints</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;Self::Result,&nbsp;<a class='enum' href='../../asn1/aper/enum.DecodeError.html' title='asn1::aper::DecodeError'>DecodeError</a>&gt;</code></span></h3><div class='docblock'><p>Constructor for the <code>Result</code> type given an aligned PER encoding.</p>
+        <h3 id='tymethod.from_aper' class='method stab '><span id='from_aper.v' class='invisible'><code>fn <a href='#tymethod.from_aper' class='fnname'>from_aper</a>(decoder: &amp;mut <a class='struct' href='../../asn1/aper/struct.Decoder.html' title='asn1::aper::Decoder'>Decoder</a>, constraints: <a class='struct' href='../../asn1/aper/struct.Constraints.html' title='asn1::aper::Constraints'>Constraints</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;Self,&nbsp;<a class='enum' href='../../asn1/aper/enum.DecodeError.html' title='asn1::aper::DecodeError'>DecodeError</a>&gt;</code></span></h3><div class='docblock'><p>Constructor for the <code>Result</code> type given an aligned PER encoding.</p>
 </div><h3 id='tymethod.to_aper' class='method stab '><span id='to_aper.v' class='invisible'><code>fn <a href='#tymethod.to_aper' class='fnname'>to_aper</a>(&amp;self, constraints: <a class='struct' href='../../asn1/aper/struct.Constraints.html' title='asn1::aper::Constraints'>Constraints</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='../../asn1/aper/struct.Encoding.html' title='asn1::aper::Encoding'>Encoding</a>,&nbsp;<a class='enum' href='../../asn1/aper/enum.EncodeError.html' title='asn1::aper::EncodeError'>EncodeError</a>&gt;</code></span></h3><div class='docblock'><p>For use with <code>Encoding::append</code></p>
 </div></div>
         <h2 id='implementors'>Implementors</h2>

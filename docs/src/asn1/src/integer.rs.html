@@ -78,8 +78,6 @@
 <span id="34">34</span>
 <span id="35">35</span>
 <span id="36">36</span>
-<span id="37">37</span>
-<span id="38">38</span>
 </pre><pre class='rust '>
 <span class='kw'>use</span> <span class='ident'>aper</span>::{<span class='ident'>APerElement</span>, <span class='ident'>Constraint</span>, <span class='ident'>Constraints</span>, <span class='ident'>Decoder</span>, <span class='ident'>DecodeError</span>, <span class='ident'>Encoding</span>, <span class='ident'>EncodeError</span>, <span class='ident'>encode_int</span>};
 <span class='kw'>use</span> <span class='ident'>std</span>::{<span class='ident'>i8</span>, <span class='ident'>i16</span>, <span class='ident'>i32</span>, <span class='ident'>u8</span>, <span class='ident'>u16</span>, <span class='ident'>u32</span>};
@@ -87,14 +85,12 @@
 <span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>int_impl</span> {
     (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span>:<span class='ident'>ident</span>) <span class='op'>=&gt;</span> {
         <span class='kw'>impl</span> <span class='ident'>APerElement</span> <span class='kw'>for</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span> {
-            <span class='kw'>type</span> <span class='prelude-ty'>Result</span> <span class='op'>=</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span>;
-            <span class='kw'>const</span> <span class='ident'>TAG</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xBEEF</span>;
             <span class='kw'>const</span> <span class='ident'>CONSTRAINTS</span>: <span class='ident'>Constraints</span> <span class='op'>=</span> <span class='ident'>Constraints</span> {
                 <span class='ident'>value</span>: <span class='prelude-val'>None</span>,
                 <span class='ident'>size</span>: <span class='prelude-val'>None</span>,
             };
             <span class='doccomment'>/// Read an `$t` from an aligned PER encoding.</span>
-            <span class='kw'>fn</span> <span class='ident'>from_aper</span>(<span class='ident'>decoder</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Decoder</span>, <span class='ident'>constraints</span>: <span class='ident'>Constraints</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='self'>Self</span>::<span class='prelude-ty'>Result</span>, <span class='ident'>DecodeError</span><span class='op'>&gt;</span> {
+            <span class='kw'>fn</span> <span class='ident'>from_aper</span>(<span class='ident'>decoder</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Decoder</span>, <span class='ident'>constraints</span>: <span class='ident'>Constraints</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='self'>Self</span>, <span class='ident'>DecodeError</span><span class='op'>&gt;</span> {
                 <span class='kw'>let</span> <span class='ident'>ret</span> <span class='op'>=</span> <span class='ident'>decoder</span>.<span class='ident'>decode_int</span>(<span class='prelude-val'>Some</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span>::<span class='ident'>MIN</span> <span class='kw'>as</span> <span class='ident'>i64</span>), <span class='prelude-val'>Some</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span>::<span class='ident'>MAX</span> <span class='kw'>as</span> <span class='ident'>i64</span>));
                 <span class='kw'>if</span> <span class='ident'>ret</span>.<span class='ident'>is_err</span>() {
                     <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>ret</span>.<span class='ident'>err</span>().<span class='ident'>unwrap</span>());
