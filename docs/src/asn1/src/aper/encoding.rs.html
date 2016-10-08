@@ -246,9 +246,20 @@
 <span id="202">202</span>
 <span id="203">203</span>
 <span id="204">204</span>
+<span id="205">205</span>
+<span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
+<span id="214">214</span>
+<span id="215">215</span>
+<span id="216">216</span>
 </pre><pre class='rust '>
-<span class='kw'>use</span> <span class='ident'>byteorder</span>::{<span class='ident'>ByteOrder</span>, <span class='ident'>BigEndian</span>, <span class='ident'>WriteBytesExt</span>};
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::{<span class='self'>self</span>, <span class='ident'>BufRead</span>, <span class='ident'>Read</span>, <span class='ident'>Write</span>, <span class='ident'>Cursor</span>};
+<span class='kw'>use</span> <span class='ident'>byteorder</span>::{<span class='ident'>BigEndian</span>, <span class='ident'>WriteBytesExt</span>};
 <span class='kw'>use</span> <span class='kw'>super</span>::<span class='op'>*</span>;
 <span class='kw'>use</span> <span class='ident'>utils</span>::<span class='ident'>shift_bytes_left</span>;
 
@@ -257,6 +268,7 @@
     <span class='ident'>MissingSizeConstraint</span>,
     <span class='ident'>MissingValueConstraint</span>,
     <span class='ident'>NotImplemented</span>,
+    <span class='ident'>WriteError</span>,
 }
 
 <span class='doccomment'>/// A wrapper for an aligned PER encoding.</span>
@@ -320,7 +332,7 @@
 
         <span class='comment'>// Fill LSBs of self.bytes first</span>
         <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>r_padding</span> <span class='op'>&gt;</span> <span class='number'>0</span> {
-            <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>mask</span> <span class='op'>=</span> <span class='number'>0xFF</span> <span class='op'>&lt;&lt;</span> <span class='ident'>r_padding</span>;
+            <span class='kw'>let</span> <span class='ident'>mask</span> <span class='op'>=</span> <span class='number'>0xFF</span> <span class='op'>&lt;&lt;</span> <span class='ident'>r_padding</span>;
             <span class='self'>self</span>.<span class='ident'>bytes</span>[<span class='ident'>n</span> <span class='op'>-</span> <span class='number'>1</span>] <span class='op'>|=</span> (<span class='ident'>bytes</span>[<span class='number'>0</span>] <span class='kw-2'>&amp;</span> <span class='ident'>mask</span>) <span class='op'>&gt;&gt;</span> (<span class='number'>8</span> <span class='op'>-</span> <span class='self'>self</span>.<span class='ident'>r_padding</span>);
 
             <span class='ident'>shift_bytes_left</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>bytes</span>, <span class='self'>self</span>.<span class='ident'>r_padding</span>);
@@ -424,8 +436,14 @@
         }
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>enc</span> <span class='op'>=</span> <span class='ident'>ret</span>.<span class='ident'>unwrap</span>();
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>bytes</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>new</span>();
-        <span class='kw'>let</span> <span class='ident'>ret</span> <span class='op'>=</span> <span class='ident'>bytes</span>.<span class='ident'>write_uint</span>::<span class='op'>&lt;</span><span class='ident'>BigEndian</span><span class='op'>&gt;</span>(<span class='ident'>v</span> <span class='kw'>as</span> <span class='ident'>u64</span>, <span class='ident'>len</span>);
-        <span class='ident'>enc</span>.<span class='ident'>append</span>(<span class='kw-2'>&amp;</span><span class='ident'>Encoding</span>::<span class='ident'>with_bytes</span>(<span class='ident'>bytes</span>));
+        <span class='kw'>let</span> <span class='ident'>res</span> <span class='op'>=</span> <span class='ident'>bytes</span>.<span class='ident'>write_uint</span>::<span class='op'>&lt;</span><span class='ident'>BigEndian</span><span class='op'>&gt;</span>(<span class='ident'>v</span> <span class='kw'>as</span> <span class='ident'>u64</span>, <span class='ident'>len</span>);
+        <span class='kw'>if</span> <span class='ident'>res</span>.<span class='ident'>is_err</span>() {
+            <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>EncodeError</span>::<span class='ident'>WriteError</span>);
+        }
+        <span class='kw'>let</span> <span class='ident'>ret</span> <span class='op'>=</span> <span class='ident'>enc</span>.<span class='ident'>append</span>(<span class='kw-2'>&amp;</span><span class='ident'>Encoding</span>::<span class='ident'>with_bytes</span>(<span class='ident'>bytes</span>));
+        <span class='kw'>if</span> <span class='ident'>ret</span>.<span class='ident'>is_err</span>() {
+            <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>ret</span>.<span class='ident'>err</span>().<span class='ident'>unwrap</span>());
+        }
         <span class='kw'>return</span> <span class='prelude-val'>Ok</span>(<span class='ident'>enc</span>);
     }
 
@@ -441,9 +459,15 @@
     <span class='kw'>if</span> <span class='ident'>min</span>.<span class='ident'>is_none</span>() {
         <span class='comment'>// unconstrained</span>
         <span class='kw'>let</span> <span class='ident'>ret</span> <span class='op'>=</span> <span class='ident'>bytes</span>.<span class='ident'>write_uint</span>::<span class='op'>&lt;</span><span class='ident'>BigEndian</span><span class='op'>&gt;</span>(<span class='ident'>value</span> <span class='kw'>as</span> <span class='ident'>u64</span>, <span class='ident'>len</span>);
+        <span class='kw'>if</span> <span class='ident'>ret</span>.<span class='ident'>is_err</span>() {
+            <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>EncodeError</span>::<span class='ident'>WriteError</span>);
+        }
     } <span class='kw'>else</span> {
         <span class='comment'>// semiconstrained</span>
         <span class='kw'>let</span> <span class='ident'>ret</span> <span class='op'>=</span> <span class='ident'>bytes</span>.<span class='ident'>write_uint</span>::<span class='op'>&lt;</span><span class='ident'>BigEndian</span><span class='op'>&gt;</span>((<span class='ident'>value</span> <span class='op'>-</span> <span class='ident'>min</span>.<span class='ident'>unwrap</span>()) <span class='kw'>as</span> <span class='ident'>u64</span>, <span class='ident'>len</span>);
+        <span class='kw'>if</span> <span class='ident'>ret</span>.<span class='ident'>is_err</span>() {
+            <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>EncodeError</span>::<span class='ident'>WriteError</span>);
+        }
     }
     <span class='kw'>let</span> <span class='ident'>ret</span> <span class='op'>=</span> <span class='ident'>enc</span>.<span class='ident'>append</span>(<span class='kw-2'>&amp;</span><span class='ident'>Encoding</span>::<span class='ident'>with_bytes</span>(<span class='ident'>bytes</span>));
     <span class='kw'>if</span> <span class='ident'>ret</span>.<span class='ident'>is_err</span>() {
