@@ -36,10 +36,8 @@ struct foo {
 }
 
 impl APerElement for Foo {
-    type Result = Self;
-    const TAG: u32 = 0xBEEF;
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
-    fn from_aper(decoder: &mut aper::Decoder, constraints: Constraints) -> Result<Self::Result, aper::DecodeError> {
+    fn from_aper(decoder: &mut aper::Decoder, constraints: Constraints) -> Result<Self, aper::DecodeError> {
         let bar = BitString::from_aper(decoder , Constraints {
             value: None,
             size: Some(Constraint::new(Some(4), Some(4))),
