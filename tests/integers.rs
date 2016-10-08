@@ -1,5 +1,5 @@
 extern crate asn1;
-use asn1::aper::{self, APerElement, Constraint, Constraints, UNCONSTRAINED};
+use asn1::aper::{self, APerElement, UNCONSTRAINED};
 use std::i32;
 
 #[test]

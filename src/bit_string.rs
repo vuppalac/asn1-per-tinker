@@ -1,4 +1,4 @@
-use aper::{APerElement, Constraint, Constraints, Decoder, DecodeError, Encoding, EncodeError};
+use aper::{APerElement, Constraints, Decoder, DecodeError, Encoding, EncodeError};
 use std::cmp;
 use utils::shift_bytes_left;
 
@@ -65,7 +65,7 @@ impl BitString {
     /// Check if bit `i` is set.
     pub fn is_set(&self, i: usize) -> bool {
         let mut bucket = i / 8;
-        let mut pos = (i as i64 - bucket as i64 * 8) as usize;
+        let pos = (i as i64 - bucket as i64 * 8) as usize;
         if bucket > self.data.len() {
             return false;
         }
@@ -77,7 +77,7 @@ impl BitString {
     /// Set bit `i` to `val`.
     pub fn set(&mut self, i: usize, val: bool) {
         let mut bucket = i / 8;
-        let mut pos = (i as i64 - bucket as i64 * 8) as usize;
+        let pos = (i as i64 - bucket as i64 * 8) as usize;
         if bucket > self.data.len() {
             return;
         }
@@ -144,7 +144,7 @@ impl APerElement for BitString {
         }
 
         let mut l_padding = 0;
-        let mut r_padding = 0;
+        let r_padding = 0;
         if self.num_bits < 8 {
             l_padding = 8 - self.num_bits;
         } else if self.num_bits <= 16 {

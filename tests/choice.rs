@@ -4,14 +4,14 @@ use asn1::{BitString, ExtensionMarker};
 use asn1::aper::{self, APerElement, Constraint, Constraints, Encoding, encode_int, UNCONSTRAINED};
 
 enum Foo {
-    foo { a: BitString, },
-    bar { a: Vec<u8>, },
-    baz { a: u8, b: u16, },
+    Foo { a: BitString, },
+    Bar { a: Vec<u8>, },
+    Baz { a: u8, b: u16, },
 }
 
 impl APerElement for Foo {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
-    fn from_aper(decoder: &mut aper::Decoder, constraints: Constraints) -> Result<Self, aper::DecodeError> {
+    fn from_aper(decoder: &mut aper::Decoder, _: Constraints) -> Result<Self, aper::DecodeError> {
         let is_ext = ExtensionMarker::from_aper(decoder, UNCONSTRAINED);
         if is_ext.is_err() {
             return Err(is_ext.err().unwrap());
@@ -33,18 +33,18 @@ impl APerElement for Foo {
                 if bs.is_err() {
                     Err(bs.err().unwrap())
                 } else {
-                    Ok(Foo::foo{ a: bs.unwrap(), })
+                    Ok(Foo::Foo{ a: bs.unwrap(), })
                 }
             },
             1 => {
-                let mut v = Vec::<u8>::from_aper(decoder, Constraints {
+                let v = Vec::<u8>::from_aper(decoder, Constraints {
                     value: None,
                     size: Some(Constraint::new(None, Some(3))),
                 });
                 if v.is_err() {
                     Err(v.err().unwrap())
                 } else {
-                    Ok(Foo::bar{ a: v.unwrap(), })
+                    Ok(Foo::Bar{ a: v.unwrap(), })
                 }
             },
             2 => {
@@ -53,31 +53,31 @@ impl APerElement for Foo {
                 if a.is_err() || b.is_err() {
                     Err(a.err().unwrap())
                 } else {
-                    Ok(Foo::baz{ a: a.unwrap(), b: b.unwrap(), })
+                    Ok(Foo::Baz{ a: a.unwrap(), b: b.unwrap(), })
                 }
             }
             _ => Err(aper::DecodeError::InvalidChoice)
         }
     }
 
-    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, aper::EncodeError> {
+    fn to_aper(&self, _: Constraints) -> Result<Encoding, aper::EncodeError> {
         let mut enc = (false as ExtensionMarker).to_aper(UNCONSTRAINED).unwrap();
         match *self {
-            Foo::foo{a: ref a} => {
-                enc.append(&encode_int(0, Some(0), Some(2)).unwrap());
+            Foo::Foo{ref a} => {
+                enc.append(&encode_int(0, Some(0), Some(2)).unwrap()).unwrap();
                 enc.append(&a.to_aper(Constraints {
                     value: None,
                     size: Some(Constraint::new(None, Some(4))),
-                }).unwrap());
+                }).unwrap()).unwrap();
             },
-            Foo::bar{a: ref a} => {
-                enc.append(&encode_int(1, Some(0), Some(2)).unwrap());
-                enc.append(&a.to_aper(UNCONSTRAINED).unwrap());
+            Foo::Bar{ref a} => {
+                enc.append(&encode_int(1, Some(0), Some(2)).unwrap()).unwrap();
+                enc.append(&a.to_aper(UNCONSTRAINED).unwrap()).unwrap();
             },
-            Foo::baz{a: ref a, b: ref b} => {
-                enc.append(&encode_int(2, Some(0), Some(2)).unwrap());
-                enc.append(&a.to_aper(UNCONSTRAINED).unwrap());
-                enc.append(&b.to_aper(UNCONSTRAINED).unwrap());
+            Foo::Baz{ref a, ref b} => {
+                enc.append(&encode_int(2, Some(0), Some(2)).unwrap()).unwrap();
+                enc.append(&a.to_aper(UNCONSTRAINED).unwrap()).unwrap();
+                enc.append(&b.to_aper(UNCONSTRAINED).unwrap()).unwrap();
             },
         };
         Ok(enc)
@@ -86,21 +86,21 @@ impl APerElement for Foo {
 
 #[test]
 fn encode_foo() {
-    let x: Foo = Foo::foo{ a: BitString::with_bytes_and_len(&vec![0x0e], 4), };
+    let x: Foo = Foo::Foo{ a: BitString::with_bytes_and_len(&vec![0x0e], 4), };
     let target: Vec<u8> = vec![0x1c];
     assert_eq!(target, *x.to_aper(UNCONSTRAINED).unwrap().bytes());
 }
 
 #[test]
 fn encode_bar() {
-    let x: Foo = Foo::bar{ a: vec![0x46, 0x4f, 0x4f], };
+    let x: Foo = Foo::Bar{ a: vec![0x46, 0x4f, 0x4f], };
     let target: Vec<u8> = vec![32, 104, 201, 233, 224];
     assert_eq!(target, *x.to_aper(UNCONSTRAINED).unwrap().bytes());
 }
 
 #[test]
 fn encode_baz() {
-    let x: Foo = Foo::baz{ a: 42, b: 300 };
+    let x: Foo = Foo::Baz{ a: 42, b: 300 };
     let target: Vec<u8> = vec![69, 64, 37, 128];
     assert_eq!(target, *x.to_aper(UNCONSTRAINED).unwrap().bytes());
 }
@@ -112,7 +112,7 @@ fn decode_foo() {
     let f = Foo::from_aper(&mut d, UNCONSTRAINED).unwrap();
 
     match f {
-        Foo::foo{a: x} => {
+        Foo::Foo{a: x} => {
             for i in 0..4 {
                 if i == 1 || i == 2 || i == 3 {
                     assert_eq!(true, x.is_set(i));
@@ -129,12 +129,12 @@ fn decode_foo() {
 fn decode_bar() {
     let data = b"\x01\x03\x46\x4f\x4f";
     let mut d = aper::Decoder::new(data);
-    d.read(5); // strip left-padding
+    d.read(5).unwrap(); // strip left-padding
     let f = Foo::from_aper(&mut d, UNCONSTRAINED).unwrap();
     let target_bar = vec![0x46 as u8, 0x4f as u8, 0x4f as u8];
 
     match f {
-        Foo::bar{a: x} => {
+        Foo::Bar{a: x} => {
             assert_eq!(x.len(), target_bar.len());
             for i in 0..x.len() {
                 assert_eq!(x[i], target_bar[i]);
@@ -148,11 +148,11 @@ fn decode_bar() {
 fn decode_baz() {
     let data = b"\x02\x88\xf9\x3b";
     let mut d = aper::Decoder::new(data);
-    d.read(5); // strip left-padding 
+    d.read(5).unwrap(); // strip left-padding 
     let f = Foo::from_aper(&mut d, UNCONSTRAINED).unwrap();
 
     match f {
-        Foo::baz{a: x, b: y} => {
+        Foo::Baz{a: x, b: y} => {
             assert_eq!(0x88 as u8, x);
             assert_eq!(0xf93b as u16, y);
         },

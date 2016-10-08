@@ -1,4 +1,4 @@
-use aper::{APerElement, Constraint, Constraints, Decoder, DecodeError, Encoding, EncodeError};
+use aper::{APerElement, Constraints, Decoder, DecodeError, Encoding, EncodeError};
 
 impl APerElement for bool {
     const CONSTRAINTS: Constraints = Constraints {
@@ -7,7 +7,7 @@ impl APerElement for bool {
     };
 
     /// Read a `bool` from an aligned PER encoding.
-    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+    fn from_aper(decoder: &mut Decoder, _: Constraints) -> Result<Self, DecodeError> {
         let ret = decoder.read(1);
         if ret.is_err() {
             return Err(ret.err().unwrap());
@@ -15,7 +15,7 @@ impl APerElement for bool {
         Ok(ret.unwrap() > 0)
     }
 
-    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+    fn to_aper(&self, _: Constraints) -> Result<Encoding, EncodeError> {
         Ok(Encoding::with_bytes_and_padding(vec![(*self as u8) << 7], 7))
     }
 }

@@ -1,4 +1,4 @@
-use aper::{APerElement, Constraint, Constraints, Decoder, DecodeError, Encoding, EncodeError};
+use aper::{APerElement, Constraints, Decoder, DecodeError, Encoding, EncodeError};
 
 impl APerElement for () {
     const CONSTRAINTS: Constraints = Constraints {
@@ -7,11 +7,11 @@ impl APerElement for () {
     };
 
     /// Read `()` from an aligned PER encoding.
-    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+    fn from_aper(_: &mut Decoder, _: Constraints) -> Result<Self, DecodeError> {
         Ok(())
     }
 
-    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+    fn to_aper(&self, _: Constraints) -> Result<Encoding, EncodeError> {
         Ok(Encoding::new())
     }
 }

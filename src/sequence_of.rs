@@ -1,4 +1,4 @@
-use aper::{APerElement, Constraint, Constraints, Decoder, DecodeError, Encoding, EncodeError, encode_length};
+use aper::{APerElement, Constraints, Decoder, DecodeError, Encoding, EncodeError, encode_length};
 
 impl<T: APerElement> APerElement for Vec<T> {
     const CONSTRAINTS: Constraints = Constraints {
@@ -26,7 +26,7 @@ impl<T: APerElement> APerElement for Vec<T> {
             return Err(DecodeError::NotImplemented);
         }
 
-        let mut len: usize = 0;
+        let len: usize;
         if max_len == min_len {
             len = max_len;
         } else {
@@ -38,7 +38,7 @@ impl<T: APerElement> APerElement for Vec<T> {
         }
 
         // XXX: This is terrible, but convenient. Either fix or document thoroughly.
-        let mut el_constrs = Constraints {
+        let el_constrs = Constraints {
             value: None,
             size: constraints.value,
         };
@@ -61,11 +61,14 @@ impl<T: APerElement> APerElement for Vec<T> {
         }
         let mut enc = ret.unwrap();
         for x in self {
-            enc.append(&x.to_aper(Constraints {
+            let ret = enc.append(&x.to_aper(Constraints {
                     value: None,
                     size: constraints.value,
                 })
                 .unwrap());
+            if ret.is_err() {
+                return Err(ret.err().unwrap());
+            }
         }
         Ok(enc)
     }

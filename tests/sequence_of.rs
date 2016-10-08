@@ -1,6 +1,6 @@
 extern crate asn1;
 use asn1::BitString;
-use asn1::aper::{self, APerElement, Constraint, Constraints, Encoding, encode_int, UNCONSTRAINED};
+use asn1::aper::{self, APerElement, Constraint, Constraints, UNCONSTRAINED};
 use std::i32;
 
 #[test]
@@ -14,7 +14,7 @@ fn encode_sequence_of_u8() {
 fn decode_sequence_of_u8() {
     let data = b"\x03\x46\x4f\x4f";
     let mut d = aper::Decoder::new(data);
-    let mut v = Vec::<u8>::from_aper(&mut d, Constraints {
+    let v = Vec::<u8>::from_aper(&mut d, Constraints {
         value: None,
         size: Some(Constraint::new(None, Some(3))),
     }).unwrap();
@@ -36,7 +36,7 @@ fn decode_sequence_of_u16() {
     let data = b"\x03\xfe\x46\xc0\x4f\x88\x4f";
     let target = vec![0xfe46 as u16, 0xc04f as u16, 0x884f as u16];
     let mut d = aper::Decoder::new(data);
-    let mut v = Vec::<u16>::from_aper(&mut d, Constraints {
+    let v = Vec::<u16>::from_aper(&mut d, Constraints {
         value: None,
         size: Some(Constraint::new(None, Some(3))),
     }).unwrap();
@@ -65,7 +65,7 @@ fn decode_sequence_of_i32() {
         target.push(i32::MIN + i);
     }
     let mut d = aper::Decoder::new(data);
-    let mut v = Vec::<i32>::from_aper(&mut d, Constraints {
+    let v = Vec::<i32>::from_aper(&mut d, Constraints {
         value: None,
         size: Some(Constraint::new(None, Some(3))),
     }).unwrap();
@@ -79,7 +79,7 @@ fn decode_sequence_of_i32() {
 fn decode_sequence_of_short_bit_string() {
     let data = b"\x02\xee";
     let mut d = aper::Decoder::new(data);
-    let mut v = Vec::<BitString>::from_aper(&mut d, Constraints {
+    let v = Vec::<BitString>::from_aper(&mut d, Constraints {
         // here the "value" constraint is a constraint on the size of each element
         value: Some(Constraint::new(None, Some(4))), 
         // "size" behaves normally 
@@ -102,7 +102,7 @@ fn decode_sequence_of_short_bit_string() {
 fn decode_sequence_of_long_bit_string() {
     let data = b"\x02\x00\x00\xe0\x00\x00\xe0";
     let mut d = aper::Decoder::new(data);
-    let mut v = Vec::<BitString>::from_aper(&mut d, Constraints {
+    let v = Vec::<BitString>::from_aper(&mut d, Constraints {
         // here the "value" constraint is a constraint on the size of each element
         value: Some(Constraint::new(None, Some(24))), 
         // "size" behaves normally 

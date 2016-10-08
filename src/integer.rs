@@ -1,4 +1,4 @@
-use aper::{APerElement, Constraint, Constraints, Decoder, DecodeError, Encoding, EncodeError, encode_int};
+use aper::{APerElement, Constraints, Decoder, DecodeError, Encoding, EncodeError, encode_int};
 use std::{i8, i16, i32, u8, u16, u32};
 
 macro_rules! int_impl {
@@ -9,7 +9,7 @@ macro_rules! int_impl {
                 size: None,
             };
             /// Read an `$t` from an aligned PER encoding.
-            fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+            fn from_aper(decoder: &mut Decoder, _: Constraints) -> Result<Self, DecodeError> {
                 let ret = decoder.decode_int(Some($t::MIN as i64), Some($t::MAX as i64));
                 if ret.is_err() {
                     return Err(ret.err().unwrap());
@@ -17,7 +17,7 @@ macro_rules! int_impl {
                 Ok(ret.unwrap() as $t)
             }
 
-            fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+            fn to_aper(&self, _: Constraints) -> Result<Encoding, EncodeError> {
                 let ret = encode_int(*self as i64, Some($t::MIN as i64), Some($t::MAX as i64));
                 if ret.is_err() {
                     return Err(ret.err().unwrap());

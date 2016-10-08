@@ -1,5 +1,4 @@
-use byteorder::{ByteOrder, BigEndian, WriteBytesExt};
-use std::io::{self, BufRead, Read, Write, Cursor};
+use byteorder::{BigEndian, WriteBytesExt};
 use super::*;
 use utils::shift_bytes_left;
 
@@ -8,6 +7,7 @@ pub enum EncodeError {
     MissingSizeConstraint,
     MissingValueConstraint,
     NotImplemented,
+    WriteError,
 }
 
 /// A wrapper for an aligned PER encoding.
@@ -71,7 +71,7 @@ impl Encoding {
 
         // Fill LSBs of self.bytes first
         if self.r_padding > 0 {
-            let mut mask = 0xFF << r_padding;
+            let mask = 0xFF << r_padding;
             self.bytes[n - 1] |= (bytes[0] & mask) >> (8 - self.r_padding);
 
             shift_bytes_left(&mut bytes, self.r_padding);
@@ -175,8 +175,14 @@ pub fn encode_int(value: i64, min: Option<i64>, max: Option<i64>) -> Result<Enco
         }
         let mut enc = ret.unwrap();
         let mut bytes: Vec<u8> = Vec::new();
-        let ret = bytes.write_uint::<BigEndian>(v as u64, len);
-        enc.append(&Encoding::with_bytes(bytes));
+        let res = bytes.write_uint::<BigEndian>(v as u64, len);
+        if res.is_err() {
+            return Err(EncodeError::WriteError);
+        }
+        let ret = enc.append(&Encoding::with_bytes(bytes));
+        if ret.is_err() {
+            return Err(ret.err().unwrap());
+        }
         return Ok(enc);
     }
 
@@ -192,9 +198,15 @@ pub fn encode_int(value: i64, min: Option<i64>, max: Option<i64>) -> Result<Enco
     if min.is_none() {
         // unconstrained
         let ret = bytes.write_uint::<BigEndian>(value as u64, len);
+        if ret.is_err() {
+            return Err(EncodeError::WriteError);
+        }
     } else {
         // semiconstrained
         let ret = bytes.write_uint::<BigEndian>((value - min.unwrap()) as u64, len);
+        if ret.is_err() {
+            return Err(EncodeError::WriteError);
+        }
     }
     let ret = enc.append(&Encoding::with_bytes(bytes));
     if ret.is_err() {

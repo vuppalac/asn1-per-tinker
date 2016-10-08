@@ -1,5 +1,4 @@
-use byteorder::{ByteOrder, BigEndian, ReadBytesExt, WriteBytesExt};
-use std::io::{self, BufRead, Read, Write, Cursor};
+use byteorder::{ByteOrder, BigEndian};
 use super::*;
 
 #[derive(Debug, PartialEq)]
@@ -67,23 +66,22 @@ impl<'a> Decoder<'a> {
             return Err(DecodeError::NotEnoughBits);
         }
 
-        let mut l_bucket = self.pos / 8;
-        let mut h_bucket = (self.pos + n) / 8;
-        let l_off = self.pos - l_bucket * 8;
+        let l_bucket = self.pos / 8;
+        let h_bucket = (self.pos + n) / 8;
         let h_off = (self.pos + n) - h_bucket * 8;
-        let mut ret: u8 = 0;
+        let mut ret: u8;
 
         if l_bucket == h_bucket {
             let mask = (0xFF >> (8 - n)) << (8 - h_off);
             ret = (self.data[l_bucket] & mask) >> (8 - h_off);
         } else if l_bucket < h_bucket && h_off == 0 {
-            let mask = (0xFF >> (8 - n));
-            ret = (self.data[l_bucket] & mask);
+            let mask = 0xFF >> (8 - n);
+            ret = self.data[l_bucket] & mask;
         } else {
-            let l_mask = (0xFF >> (8 - (n - h_off)));
-            let h_mask = (0xFF << (8 - h_off));
+            let l_mask = 0xFF >> (8 - (n - h_off));
+            let h_mask = 0xFF << (8 - h_off);
             ret = (self.data[l_bucket] & l_mask) << h_off;
-            ret |= ((self.data[h_bucket] & h_mask) >> (8 - h_off))
+            ret |= (self.data[h_bucket] & h_mask) >> (8 - h_off);
         }
         self.pos += n;
         Ok(ret)
@@ -143,7 +141,6 @@ impl<'a> Decoder<'a> {
 
         let mut b = ret.unwrap();
         if b & LENGTH_DET_FRAG > 0 {
-            unimplemented!();
             return Err(DecodeError::NotImplemented);
         } else if b & LENGTH_DET_LONG > 0 {
             let len: usize = (b & LENGTH_MASK_LONG) as usize;

@@ -12,18 +12,18 @@ struct Foo {
 
 impl APerElement for Foo {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
-    fn from_aper(decoder: &mut aper::Decoder, constraints: Constraints) -> Result<Self, aper::DecodeError> {
+    fn from_aper(decoder: &mut aper::Decoder, _: Constraints) -> Result<Self, aper::DecodeError> {
         let foo = BitString::from_aper(decoder , Constraints {
             value: None,
             size: Some(Constraint::new(None, Some(4))),
         });
 
-        let mut bar = Vec::<u8>::from_aper(decoder, Constraints {
+        let bar = Vec::<u8>::from_aper(decoder, Constraints {
             value: None,
             size: Some(Constraint::new(None, Some(3))),
         });
 
-        let mut baz = Vec::<BitString>::from_aper(decoder, Constraints {
+        let baz = Vec::<BitString>::from_aper(decoder, Constraints {
             // here the "value" constraint is a constraint on the size of each element
             value: Some(Constraint::new(None, Some(4))), 
             // "size" behaves normally 
@@ -47,7 +47,7 @@ impl APerElement for Foo {
         })
     }
     
-    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, aper::EncodeError> {
+    fn to_aper(&self, _: Constraints) -> Result<Encoding, aper::EncodeError> {
         let mut enc = self.foo.to_aper(Constraints {
             value: None,
             size: Some(Constraint::new(None, Some(4))),
@@ -56,14 +56,14 @@ impl APerElement for Foo {
         enc.append(&self.bar.to_aper(Constraints {
             value: None,
             size: Some(Constraint::new(None, Some(3))),
-        }).unwrap());
+        }).unwrap()).unwrap();
 
         enc.append(&self.baz.to_aper(Constraints {
             // here the "value" constraint is a constraint on the size of each element
             value: Some(Constraint::new(None, Some(4))), 
             // "size" behaves normally 
             size: Some(Constraint::new(None, Some(2))),
-        }).unwrap());
+        }).unwrap()).unwrap();
 
         Ok(enc)
     }
@@ -88,7 +88,7 @@ fn decode_foo() {
     // [14, 3, 70, 79, 79, 2, 224, 224]
     let data = b"\x0e\x03\x46\x4f\x4f\x02\xee";
     let mut d = aper::Decoder::new(data);
-    d.read(4); // strip left-padding
+    d.read(4).unwrap(); // strip left-padding
     let f = Foo::from_aper(&mut d, UNCONSTRAINED).unwrap();
     let target_bar = vec![0x46 as u8, 0x4f as u8, 0x4f as u8];
 

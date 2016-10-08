@@ -225,5 +225,5 @@ pub trait APerElement: Sized {
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, decoder::DecodeError>;
 
     /// For use with `Encoding::append`
-    fn to_aper(&self, constraints: Constraints) -> Result<encoding::Encoding, encoding::EncodeError>;
+    fn to_aper(&self, constraints: Constraints) -> Result<encoding::Encoding, encoding::EncodeError>; 
 }
