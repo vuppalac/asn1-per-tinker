@@ -10,10 +10,8 @@ enum Foo {
 }
 
 impl APerElement for Foo {
-    type Result = Self;
-    const TAG: u32 = 0xBEEF;
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
-    fn from_aper(decoder: &mut aper::Decoder, constraints: Constraints) -> Result<Self::Result, aper::DecodeError> {
+    fn from_aper(decoder: &mut aper::Decoder, constraints: Constraints) -> Result<Self, aper::DecodeError> {
         let is_ext = ExtensionMarker::from_aper(decoder, UNCONSTRAINED);
         if is_ext.is_err() {
             return Err(is_ext.err().unwrap());

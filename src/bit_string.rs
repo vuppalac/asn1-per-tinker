@@ -92,15 +92,13 @@ impl BitString {
 }
 
 impl APerElement for BitString {
-    type Result = Self;
-    const TAG: u32 = 0xBEEF;
     const CONSTRAINTS: Constraints = Constraints {
         value: None,
         size: None,
     };
 
     /// Construct a `BitString` from an aligned PER encoding.
-    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self::Result, DecodeError> {
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         if constraints.size.is_none() {
             return Err(DecodeError::MissingSizeConstraint);
         }
