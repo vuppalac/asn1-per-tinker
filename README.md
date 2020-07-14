@@ -12,7 +12,7 @@ Add the following to your `Cargo.toml`.
 
 ```rust
 [dependencies]
-asn1 = { git = "https://github.com/melvinw/rust-asn1" }
+asn1 = { git = "https://github.com/vuppalac/rust-asn1" }
 ```
 
 To encode/decode your own types, just implement the `APerElement` trait. Below is an example for a simple ASN.1 messsage, `foo`.
